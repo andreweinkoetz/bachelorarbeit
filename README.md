@@ -1,1 +1,1 @@
-# bachelorarbeit
+# Bachelorarbeit Wirtschaftsinformatik Hochschule München
