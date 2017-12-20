@@ -95,7 +95,11 @@
   \end{center}
 \end{titlepage}
 
-
+\newpage
+\section*{Abstract}
+\addcontentsline{toc}{section}{Abstract}
+Hier steht am Ende was genau eigentlich mit dem Unsinn hier erreicht werden soll.
+\newpage
   % Inhaltsverzeichnis
  \tableofcontents
 
@@ -112,12 +116,56 @@ Die Anforderungen an Webanwendungen haben sich in den vergangenen Jahren stark v
 
 \newpage
 \section{Das WebSocket Protokoll}\label{sec:WebSocketProtokoll}
-Die Arbeit an der Spezifikation des WebSocket Protokolls begann bereits 2009, als es von Google in Zusammenarbeit mit Apple, Microsoft und Mozilla im Rahmen ihrer Kooperation WHATWG\footnote{Web Hypertext Application Technology Working Group unter: www.whatwg.org} der Internet Engineering Task Force (IETF) vorgeschlagen wurde. Bis Mai 2010 wurden noch zahlreiche Verbesserungen hinzugefügt, bis es schließlich in Version 76 \autocite{hickson_websocket_2010} im August 2010 an die BiDirectional or Server-Initiated HTTP (HyBi) Task Force der IETF zur Weiterentwicklung übergeben wurde \autocite{fette_websocket_2010}. Neben vielen anderen Fortschritten wurde das Protkoll um die Möglichkeit erweitert binäre Dateien auszutauschen, sowie Sicherheitslücken geschlossen, die in Verbindung mit Proxy-Servern entstehen konnten. Im Dezember 2010 wurde das WebSocket Protokoll von der IETF zu dem Request for Comment (RFC) 6455 erklärt \autocite{fette_websocket_2011}.
-\subsection{Aufbau und Funktionsweise}\label{subsec:wsAufbau}
-Der für die Spezifikation des WebSocket Protokolls zuständige RFC 6455 
+Die Arbeit an der Spezifikation des WebSocket Protokolls begann bereits 2009, als es von Google in Zusammenarbeit mit Apple, Microsoft und Mozilla im Rahmen ihrer Kooperation WHATWG\footnote{Web Hypertext Application Technology Working Group unter: www.whatwg.org} der Internet Engineering Task Force (IETF) vorgeschlagen wurde. Bis Mai 2010 wurden noch zahlreiche Verbesserungen hinzugefügt, bis es schließlich in Version 76 \autocite{hickson_websocket_2010} im August 2010 an die BiDirectional or Server-Initiated HTTP (HyBi) Task Force der IETF zur Weiterentwicklung übergeben wurde \autocite{fette_websocket_2010}. Neben vielen anderen Fortschritten wurde das Protkoll um die Möglichkeit erweitert binäre Dateien auszutauschen, sowie Sicherheitslücken geschlossen, die in Verbindung mit Proxy-Servern entstehen konnten. Im Dezember 2010 wurde das WebSocket Protokoll von der IETF zu dem Request for Comment (RFC) 6455 erklärt \autocite{fette_websocket_2011}. Dieser definiert auf über 70 Seiten neben dem Lebenszyklus und den verschiedenen Frames der WebSockets noch zahlreiche weitere technische Details und Defintionen. In diesem Kapitel sollen die wichtigsten Grundlagen der Protokollspezifikation dargelegt werden.
+\subsection{WebSocket-Frames}\label{subsec:wsFrames}
+Die Spezifikation eines WebSocket-Frames sieht eine Zweiteilung vor, wie sie bei Protokollnachrichten üblicherweise vorgenommen wird. Ein WebSocket-Frame besteht demnach aus einem Header Bereich der Kontrolldaten enthält, sowie dem Payload, welcher die Nutzdaten beinhaltet.\vspace{2mm}
+\begin{figure}[ht] \label{fig:wsFrame}
+	\begin{center}
+		\includegraphics[scale=1.25]{img/frame.pdf}
+		\caption{Vereinfachte Darstellung eines WebSocket Frames}
+	\end{center}
+\end{figure}
+Anhand des Aufbaus ist leicht erkennbar, dass die Kommunikation über WebSockets mit deutlich geringeren Paketgrößen arbeiten kann als HTTP. Eine Nachricht mit einfacher Längenangabe, die von Server zu Client geschickt wird, erzeugt durch ihren Header lediglich einen Overhead von zwei Byte. Da WebSocket-Frames auf umgekehrtem Weg zusätzlich noch maskiert werden müssen, entspricht die minimale Länge eines clientseitigen Frames sechs Byte . Im Vergleich dazu beträgt der Overhead bei einer einfachen GET-Anfrage über HTTP/1.1 beim Aufruf des Hosts unter cs.hm.edu 35 Byte. Die Angabe des Hostnamens in HTTP/1.1 ist obligatorisch und trägt maßgeblich zur Größe des HTTP-Frames bei \autocite[128]{leach_hypertext_1999}. 
+
+\subsubsection{Header-Felder}\label{subsubsec:wsHeader}
+Im nachfolgenden Abschnitt werden die Felder sowie deren jeweilige Aufgabe detailliert erläutert:
+
+\begin{description}
+	\item[FIN (1 Bit)] Das FIN-Flag gibt an, ob es sich bei dem empfangenen Frame um ein Fragment handelt. Kann der Payload nicht auf einmal übertragen werden, so wird die Übertragung über mehrere Frames gesteuert. Das FIN-Flag aller unvollständigen Fragmente weist den Wert 0 auf, wohingegen das finale Fragment mit einer 1 gekennzeichnet ist. Wenn alle Nutzdaten mit einem einzigen Frame übertragen werden können, so trägt dessen FIN-Flag ebenfalls den Wert 1.
+	\item[RSV1, RSV2, RSV3 (jeweils 1 Bit] Diese Flags sind für zukünftige Implementierung reserviert und finden aktuell keine standardisierte Anwendung. Daher tragen sie meist den Wert 0. Ist eines dieser Flags gesetzt und die empfangende Stelle hat keine Erweiterung, welches das jeweilige Flag interpretieren kann, so muss die WebSocket-Verbindung geschlossen werden \autocite[27]{fette_websocket_2011}.
+	\item[opcode (4 Bit)] Das opcode-Feld enthält die Angabe wie der Payload zu interpretieren ist. Neben den sogenannten Datenframes bzw. Non-Control-Frames, welche die Art der übertragenen Daten kennzeichnen, sind Control-Frames definiert, die zur Steuerung und Überprüfung der Verbindung verwendet werden. Wird ein unbekannter Opcode empfangen, so wird die WebSocket-Verbindung geschlossen.
+	\begin{itemize}
+		\item \textbf{0x0} definiert ein Fortsetzungs-Frame
+		\item \textbf{0x1} definiert ein Text-Frame
+		\item \textbf{0x2} definiert ein Binary-Frame
+		\item \textbf{0x3-7} reserviert für weitere Non-Control-Frames
+		\item \textbf{0x8} definiert ein Verbindung beenden-Frame
+		\item \textbf{0x9} definiert ein Ping-Frame
+		\item \textbf{0xA} definiert ein Pong-Frame
+		\item \textbf{0xB-F} reserviert für weitere Control-Frames
+	\end{itemize}
+	\item[MASK (1 Bit)] Ist das MASK-Flag gesetzt, so ist der Payload maskiert. Frames, die clientseitig initiert wurden, müssen maskiert sein, wohingegen serverseitige Frames keine Maskierung vornehmen dürfen. Der verwendete Masking-Key muss im gleichnamigen Header-Feld hinterlegt werden.
+	\item[payload length (7 Bit)] Hier wird die Länge der Nutzdaten angegeben. Sind diese nicht größer als 125 Bytes, so können sie mit nur einem Frame übertragen werden. Nutzdaten mit einem höheren Speicherplatzbedarf werden je nach Größe mit dem Wert 126 bzw. 127 angegeben. Diese Angaben führen zur Verwendung des Header-Felds \textit{Extended payload length}.
+	\item[Extended payload length (16 Bit oder 64 Bit)] Überschreitet die Länge des Payloads 125 Byte, so wird dieses Feld verwendet. Je nach Wert im Header-Feld \textit{payload length} umfasst die \textit{Extended payload length} zwei Byte oder acht Byte. Dementsprechend beträgt die maximale Länge der Nutzdaten in einem WebSocket-Frame $2^{64} - 1$ Byte \autocite[41]{gorski_websockets_2015}
+	\item[Masking Key (0 oder 32 Bit)] Ein Frame, der von einem Client an einen Server gesendet wird, muss mit einem 32-Bit Schlüssel maskiert werden. Dieser wird vom Client generiert und im gleichnamigen Header-Feld abgelegt. Nachrichten, die von einem Server an einen Client gesendet werden, enthalten dieses Feld nicht.
+	\item[data (n Byte)] Hier befinden sich die eigentlichen Nutzdaten. Ihre Größe wird in den entsprechenden Längenfeldern des Headers hinterlegt. Werden lediglich Steuerungsinformationen übertragen, wird kein Payload mitgesendet.
+\end{description}
+
+\subsubsection{Non-Control-Frames}\label{subsubsec:wsNCFrames} 
+Durch das Header-Feld \textit{opcode} wird die Art der Nutzdaten angegeben. Es können sowohl textbasierte Daten als auch Binärdaten übertragen werden. Bei der Kommunikation über WebSockets gibt es hier einige zusätzliche Mechanismen, die für den fehlerfreien Ablauf einer Übertragung notwendig sind. Der folgende Abschnitt handelt von der bereits aus anderen Protokollen bekannten Fragmentierung, die WebSocket-Frames zur sequentiellen Übertragung unvollständiger Daten nutzt sowie der aufgrund von Sicherheitsproblemen eingeführten Maskierung clientseitig initierter Nachrichten.
+
+\subsubsection*{Fragmentierung}
+
+\subsubsection*{Maskierung}
+
+\subsubsection{Control-Frames}\label{subsubsec:wsCFrames}
+
+\subsection{WebSocket Lifecycle}\label{subsec:wsLifecycle}
+\subsubsection{Verbindungsaufbau}\label{subsubsec:wsOpen}
+\subsubsection{Datentransfer}\label{subsubsec:wsData}
+\subsubsection{Verbindungsabbau}\label{subsubsec:wsClose}
 
 \subsection{Vor- und Nachteile gegenüber Request}
-\subsection{Einsatzgebiete von WebSockets}
 
 \section{Die WebSocket API}\label{sec:WebSocketAPI}
 \subsection{Client-seitige Implementierung}
@@ -138,6 +186,7 @@ Der für die Spezifikation des WebSocket Protokolls zuständige RFC 6455
 \subsection{Leistungsanalyse WebSocket-Chat}
 
 \section{Zusammenfassung und Ausblick}
+\subsection{Einsatzgebiete}
 % Unterschrift (handgeschrieben)
 
 \newpage
