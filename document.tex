@@ -21,9 +21,15 @@
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage[style=alphabetic,backend=biber]{biblatex}
 \usepackage{pdflscape}
-
+\usepackage{colortbl}
+\usepackage{color}
 \bibliography{bib/Quellen}
 
+\usepackage[footskip=1.5cm, left=2.5cm, right=2.5cm, top=2.5cm, bottom=3.5cm]{geometry}
+
+% Definieren von versch. Farben für Tabellenzellen
+\definecolor{grey}{rgb}{0.85,0.85,0.85}
+\definecolor{lightgrey}{rgb}{0.95,0.95,0.95}
 
 % Abstand obere Blattkante zur Kopfzeile ist 2.54cm - 15mm
 \setlength{\topmargin}{-15mm}
@@ -132,7 +138,7 @@ Im nachfolgenden Abschnitt werden die Felder sowie deren jeweilige Aufgabe detai
 
 \begin{description}
 	\item[FIN (1 Bit)] Das FIN-Flag gibt an, ob es sich bei dem empfangenen Frame um ein Fragment handelt. Kann der Payload nicht auf einmal übertragen werden, so wird die Übertragung über mehrere Frames gesteuert. Das FIN-Flag aller unvollständigen Fragmente weist den Wert 0 auf, wohingegen das finale Fragment mit einer 1 gekennzeichnet ist. Wenn alle Nutzdaten mit einem einzigen Frame übertragen werden können, so trägt dessen FIN-Flag ebenfalls den Wert 1.
-	\item[RSV1, RSV2, RSV3 (jeweils 1 Bit] Diese Flags sind für zukünftige Implementierung reserviert und finden aktuell keine standardisierte Anwendung. Daher tragen sie meist den Wert 0. Ist eines dieser Flags gesetzt und die empfangende Stelle hat keine Erweiterung, welches das jeweilige Flag interpretieren kann, so muss die WebSocket-Verbindung geschlossen werden \autocite[27]{fette_websocket_2011}.
+	\item[RSV1, RSV2, RSV3 (jeweils 1 Bit)] Diese Flags sind für zukünftige Implementierung reserviert und finden aktuell keine standardisierte Anwendung. Daher tragen sie meist den Wert 0. Ist eines dieser Flags gesetzt und die empfangende Stelle hat keine Erweiterung, welches das jeweilige Flag interpretieren kann, so muss die WebSocket-Verbindung geschlossen werden \autocite[27]{fette_websocket_2011}.
 	\item[opcode (4 Bit)] Das opcode-Feld enthält die Angabe wie der Payload zu interpretieren ist. Neben den sogenannten Datenframes bzw. Non-Control-Frames, welche die Art der übertragenen Daten kennzeichnen, sind Control-Frames definiert, die zur Steuerung und Überprüfung der Verbindung verwendet werden. Wird ein unbekannter Opcode empfangen, so wird die WebSocket-Verbindung geschlossen.
 	\begin{itemize}
 		\item \textbf{0x0} definiert ein Fortsetzungs-Frame
@@ -154,9 +160,56 @@ Im nachfolgenden Abschnitt werden die Felder sowie deren jeweilige Aufgabe detai
 \subsubsection{Non-Control-Frames}\label{subsubsec:wsNCFrames} 
 Durch das Header-Feld \textit{opcode} wird die Art der Nutzdaten angegeben. Es können sowohl textbasierte Daten als auch Binärdaten übertragen werden. Bei der Kommunikation über WebSockets gibt es hier einige zusätzliche Mechanismen, die für den fehlerfreien Ablauf einer Übertragung notwendig sind. Der folgende Abschnitt handelt von der bereits aus anderen Protokollen bekannten Fragmentierung, die WebSocket-Frames zur sequentiellen Übertragung unvollständiger Daten nutzt sowie der aufgrund von Sicherheitsproblemen eingeführten Maskierung clientseitig initierter Nachrichten.
 
-\subsubsection*{Fragmentierung}
+\subsubsection*{Fragmentierung}\label{subsubsec:wsFragment}
+In Abschnitt 5.4. des RFC6455 ist die Fragmentierung von WebSocket-Frames beschrieben. Primäre Anwendung erfährt dieses Verfahren, wenn die Daten zum Zeitpunkt der Übertragung noch nicht vollständig vorliegen oder nicht zwischengespeichert werden können. Wird die vom Server oder einer vermittelnden Stelle festgelegte Puffergröße überschritten, so wird ein Nachrichtenfragment mit dem Inhalt des Puffers gesendet \autocite[32]{fette_websocket_2011}.\\
 
-\subsubsection*{Maskierung}
+\noindent Folgende Grundsätze müssen bei der Fragmentierung beachtet werden. Erweiterungen werden hierbei außer Acht gelassen:
+\begin{itemize}
+	\item Unfragmentierte Nachrichten werden mit einem einzelnen Frame übertragen (FIN-Bit $=$ 1,  opcode $\neq$ 0)  
+	\item Die Übertragung fragmentierter Nachrichten erfolgt über mindestens einen Frame mit FIN-Bit $=$ 0 und opcode $\neq$ 0 und wird mit einem Frame FIN-Bit $=$ 1 und opcode $\neq$ 0 abgeschlossen. Die Summe der Payloads aller Fragmente entspricht dem Payload eines Einzelframes bei entsprechender Puffergröße.
+	\item Control-Frames (Abschnitt \ref{subsubsec:wsCFrames}) dürfen nicht fragmentiert werden. Sie können zwischen der Übertragung einer fragmentierten Nachricht gesendet werden, um beispielsweise die Latenzzeit eines Pings möglichst gering zu halten. Die Verarbeitung zwischengesendeter Control-Frames muss von allen Endpunkten unterstützt werden.
+	\item Der Empfänger muss die Fragemente einer Nachricht in der gleichen Reihenfolge erhalten, in welcher sie vom Sender aufgegeben wurden.
+	\item Vermittler dürfen an der Fragmentierung keine Änderungen vornehmen, falls eines der RSV-Bits gesetzt ist und dessen Bedeutung dem Vermittler nicht bekannt ist.
+\end{itemize}
+
+\noindent Daraus folgt, dass die Verarbeitung sowohl fragmentierter als auch unfragmentierter Nachrichten von allen Endpunkten unterstützt werden muss. Da Control-Frames nicht fragmentiert werden dürfen, können Fragmente lediglich von den Typen Text, Binary oder einem der reservierten opcodes (0x3-7) sein. Die Angabe des Typs erfolgt durch den opcode des ersten Fragments. Alle weiteren Fragmente tragen den opcode 0x0, der dem Empfänger mitteilt, dass die empfangenen Nutzdaten an den Payload des vorangegangen Frames angehängt werden sollen \autocite{shepherd_writing_2017}.
+\subsubsection*{Maskierung}\label{subsubsec:wsMasking}
+WebSocket Frames, von einem Client zu einem Server gesendet, müssen maskiert werden. Dieser Mechanismus war im ursprünglichen Draft für das WebSocket Protokoll nicht vorgesehen. In Folge einer Untersuchung durch eine Gruppe von Forschern rund um ein Team der Carnegie Mellon Universität wurden Sicherheitslücken in dem Konzept aufgedeckt. Bei der Verwendung  transparenter Proxy-Server konnten sie durch deren fehlerhafte Implementierung des, bei dem Aufbau einer WebSocket Verbindung genutzten, \textit{Upgrade} Mechanismus den Cache des Proxies infizieren \autocite{huang_talking_2011}. Daraufhin wurde der Draft überarbeitet und um die Maskierung über eine bitweise XOR Verknüpfung ergänzt. \\
+
+\noindent Da der zur Maskierung des Payloads verwendete Schlüssel im Frame enthalten ist, steht hier nicht die Vertraulichkeit der gesendeten Daten im Vordergrund. Vielmehr sollen Proxy-Server daran gehindert werden, den Inhalt des Payloads zu lesen. Somit wird verhindert, dass Angreifer den Payload manipulieren und diesen für einen Angriff gegen einen Proxy einsetzen können \autocite{gorski_websockets_2015}.  Im Folgenden soll der Ablauf der Maskierung einer Textnachricht an einem Beispiel verdeutlicht werden:\\
+
+\noindent Zunächst wählt der Client einen bisher nicht verwendeten 32 Bit Schlüssel aus, der zur Maskierung verwendet werden soll. Die Nachricht, die maskiert werden soll lautet "cs.hm.edu", konvertiert in hexadezimale Darstellung "63 73 2e 68 6d 2e 65 64 75". Als Schlüssel wird "3c 2e 3f 4a" verwendet. Dieser wird nun zyklisch auf den zu maskierenden Payload mit der XOR-Operation angewendet.\\
+
+\begin{table*}[ht]
+	\begin{center}
+	\begin{tabular}{|l|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|}
+		\hline
+		Unmaskierte Bytes &  63 &  73 & 2e &68 &6d &2e &65 &64& 75 \\ \hline
+		Operator &	$\oplus$ &$\oplus$&$\oplus$ &$\oplus$ &$\oplus$ &$\oplus$ &$\oplus$&$\oplus$ &$\oplus$ \\ \hline
+		Schlüssel &  \cellcolor{lightgrey}3c &  \cellcolor{lightgrey}2e & \cellcolor{lightgrey}3f & \cellcolor{lightgrey}4a &\cellcolor{grey}3c & \cellcolor{grey}2e &\cellcolor{grey}3f &\cellcolor{grey}4a& \cellcolor{lightgrey}3c \\ \hline
+		Maskierte Bytes &  5f &  5d & 11 & 22 &51 &00 &5a &2e& 49 \\ \hline
+	\end{tabular}
+	\caption{Maskierung durch bitweise XOR-Verknüpfung}\label{tbl:wsMasking}
+		\end{center}
+\end{table*}
+\vspace{-3mm}
+\noindent Die maskierte Nachricht wird mit dem Schlüssel in dem WebSocket-Frame abgelegt. Der Server kann diese nach dem Empfang durch erneute Anwendung der selbstinversen XOR-Operation demaskieren \autocite{gorski_websockets_2015}.
+
+\begin{table*}[ht]
+	\begin{center}
+		\begin{tabular}{|l|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|}
+			\hline
+			Maskierte Bytes &  5f &  5d & 11 & 22 &51 &00 &5a &2e& 49 \\ \hline
+			Operator &	$\oplus$ &$\oplus$&$\oplus$ &$\oplus$ &$\oplus$ &$\oplus$ &$\oplus$&$\oplus$ &$\oplus$ \\ \hline
+			Schlüssel &  \cellcolor{lightgrey}3c &  \cellcolor{lightgrey}2e & \cellcolor{lightgrey}3f & \cellcolor{lightgrey}4a &\cellcolor{grey}3c & \cellcolor{grey}2e &\cellcolor{grey}3f &\cellcolor{grey}4a& \cellcolor{lightgrey}3c \\ \hline
+			Unmaskierte Bytes &  63 &  73 & 2e &68 &6d &2e &65 &64& 75 \\ \hline
+			Nachricht & c &s&.&h&m&.&e&d&u\\ \hline
+		\end{tabular}
+		\caption{Demaskierung durch bitweise XOR-Verknüpfung}\label{tbl:wsDemasking}
+	\end{center}
+\end{table*}
+
+\noindent Die Übertragung von Server zu Client darf hingegen nicht maskiert werden. Empfängt ein Server eine unmaskierte bzw. ein Client eine maskierte Nachricht, so muss in beiden Fällen die Verbindung geschlossen werden. Dabei kann der im RFC6455 spezifierte Statuscode \textit{1002 (protocol error)} beim Verbindungsabbau angegeben werden \autocite[26]{fette_websocket_2011}.
 
 \subsubsection{Control-Frames}\label{subsubsec:wsCFrames}
 
