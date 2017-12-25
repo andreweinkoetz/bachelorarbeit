@@ -138,7 +138,7 @@ Im nachfolgenden Abschnitt werden die Felder sowie deren jeweilige Aufgabe detai
 
 \begin{description}
 	\item[FIN (1 Bit)] Das FIN-Flag gibt an, ob es sich bei dem empfangenen Frame um ein Fragment handelt. Kann der Payload nicht auf einmal übertragen werden, so wird die Übertragung über mehrere Frames gesteuert. Das FIN-Flag aller unvollständigen Fragmente weist den Wert 0 auf, wohingegen das finale Fragment mit einer 1 gekennzeichnet ist. Wenn alle Nutzdaten mit einem einzigen Frame übertragen werden können, so trägt dessen FIN-Flag ebenfalls den Wert 1.
-	\item[RSV1, RSV2, RSV3 (jeweils 1 Bit)] Diese Flags sind für zukünftige Implementierung reserviert und finden aktuell keine standardisierte Anwendung. Daher tragen sie meist den Wert 0. Ist eines dieser Flags gesetzt und die empfangende Stelle hat keine Erweiterung, welches das jeweilige Flag interpretieren kann, so muss die WebSocket-Verbindung geschlossen werden \autocite[27]{fette_websocket_2011}.
+	\item[RSV1, RSV2, RSV3 (jeweils 1 Bit)] Diese Flags sind für zukünftige Implementierung reserviert und finden aktuell keine standardisierte Anwendung. Die Ausnahme stellt das RSV1-Bit dar, welches verwendet wird um anzuzeigen, ob eine Nachricht komprimiert wurde oder nicht \autocite{internet_assigned_numbers_authority_websocket_2011}. Daher tragen sie meist den Wert 0. Ist eines dieser Flags gesetzt und die empfangende Stelle hat keine Erweiterung, welches das jeweilige Flag interpretieren kann, so muss die WebSocket-Verbindung geschlossen werden \autocite[27]{fette_websocket_2011}. 
 	\item[opcode (4 Bit)] Das opcode-Feld enthält die Angabe wie der Payload zu interpretieren ist. Neben den sogenannten Datenframes bzw. Non-Control-Frames, welche die Art der übertragenen Daten kennzeichnen, sind Control-Frames definiert, die zur Steuerung und Überprüfung der Verbindung verwendet werden. Wird ein unbekannter Opcode empfangen, so wird die WebSocket-Verbindung geschlossen.
 	\begin{itemize}
 		\item \textbf{0x0} definiert ein Fortsetzungs-Frame
@@ -212,8 +212,92 @@ WebSocket Frames, von einem Client zu einem Server gesendet, müssen maskiert we
 \noindent Die Übertragung von Server zu Client darf hingegen nicht maskiert werden. Empfängt ein Server eine unmaskierte bzw. ein Client eine maskierte Nachricht, so muss in beiden Fällen die Verbindung geschlossen werden. Dabei kann der im RFC6455 spezifierte Statuscode \textit{1002 (protocol error)} beim Verbindungsabbau angegeben werden \autocite[26]{fette_websocket_2011}.
 
 \subsubsection{Control-Frames}\label{subsubsec:wsCFrames}
+Control-Frames werden dazu genutzt, den Status einer WebSocket-Verbindung zu steuern und zu überwachen. Der RFC6455 unterscheidet dabei drei Arten von Control-Frames, welche anhand des \textit{opcodes} unterschieden werden. Der Close-Frame wird zur Einleitung und Bestätigung einer schließenden Verbindung eingesetzt. Ping- bzw. Pong-Frames werden genutzt, um festzustellen ob der jeweilige Endpunkt noch erreichbar ist oder um eine Verbindung aktiv zu halten (keep-alive) \autocite[35-36]{fette_websocket_2011}. Im Folgenden werden die verschiedenen Arten der Control-Frames sowie deren Aufgaben erläutert.
 
-\subsection{WebSocket Lifecycle}\label{subsec:wsLifecycle}
+\subsubsection*{Ping- und Pong-Frames}
+Wie eingangs erwähnt, dienen Ping- und Pong-Frames zur Verwaltung offener WebSocket-Verbindungen. Ping-Frames tragen den \textit{opcode} 0x9, Pong-Frames hingegen den \textit{opcode} 0xA. Das Übertragen von Nutzdaten bis zu 125 Byte durch einen Ping- oder Pong-Frame ist durch den RFC6455 zwar vorgesehen, kommt aber typischerweise nicht zum Einsatz \autocite[48]{gorski_websockets_2015}. Enthält ein Ping-Frame Nutzdaten, so müssen diese von einem Pong-Frame übernommen und zurückgesendet werden. Empfängt ein Endpunkt einen Ping-Frame, so muss schnellstmöglich mit einem Pong-Frame darauf reagiert werden. Werden mehrere Ping-Frames empfangen, bevor ein Pong-Frame zurückgesendet wurde, so kann lediglich der zuletzt eingetroffene Ping-Frame beantwortet werden \autocite[36]{fette_websocket_2011}. Ping- und Pong-Frames dienen aktuell als rein interner Mechanismus und können nicht über eine Schnittstelle direkt versendet werden \autocite[49]{gorski_websockets_2015}.\\
+
+\begin{figure*}[ht]
+	\begin{center}
+		\begin{tabular}{l>{\arraybackslash}p{4.0cm}l}
+			& \textbf{Ping-Frame} &  \textbf{Pong-Frame}  \\ 
+			\textbf{Byte} & 89 00 & 8a 80 (85 e1 ef 27) \\
+			\textbf{Binär} & 1000 1001 & 1000 1010 (...)\\
+			\textbf{Detail} & FIN = 1, RSV n. gesetzt & FIN = 1, RSV n. gesetzt \\
+			 & opcode = 0x9 & opcode = 0xA 
+		\end{tabular}
+	\end{center}
+\caption{Ping- und Pong-Frames zur Verbindungskontrolle}
+\label{fig:wsPingPong}
+\end{figure*}
+
+\noindent Bei den in Abbildung \ref{fig:wsPingPong} dargestellten Frames handelt es sich um den Wireshark-Mitschnitt eines Heartbeats zwischen einem Client und dem Host unter \textit{ws://echo.websocket.org}. Der Server sendet dabei einen Ping-Frame, um festzustellen, ob der Client noch erreichbar ist. Der Client antwortet mit einem korrespondierenden Pong-Frame. Da es sich um eine Nachricht von einem Client zu einem Server handelt, ist dieser Frame maskiert.
+
+\subsubsection*{Close-Frames}
+Der Abbau einer WebSocket-Verbindung erfolgt durch den Versand eines Close-Frames. Der zugehörige \textit{opcode} lautet 0x8. Empfängt ein Endpunkt einen Close-Frame, ohne bereits selbst einen solchen versendet zu haben, so muss er ebenfalls mit einem Close-Frame antworten. Wurde der initiale Close-Frame mit einem Status-Code versehen, so wird dieser in der Antwort übernommen \autocite[35]{fette_websocket_2011}. Wird ein Close-Frame empfangen, so können ausstehende Fragmente noch vor dessen Bestätigung gesendet werden. Allerdings kann dabei nicht garantiert werden, dass der Endpunkt, der den Verbindungsabbau eingeleitet hat, diese Nachrichten noch verarbeitet. Haben beide Endpunkte je einen Close-Frame gesendet und empfangen, so müssen sowohl die WebSocket- als auch die TCP-Verbindung getrennt werden. Der Server muss dies unverzüglich durchführen, wohingegen der Client auf den Server warten sollte \autocite[36]{fette_websocket_2011}. Sollte der Verbindungsabbau von beiden Endpunkten gleichzeitig eröffnet werden, so kann angenommen werden, dass die Verbindung geschlossen ist.\\ 
+
+\begin{figure*}[ht]
+	\begin{center}
+		\begin{tabular}{l>{\arraybackslash}p{8.0cm}}
+			& \textbf{Client}  \\ 
+			\textbf{Byte} & 88 82 (2a 1f fc f2) 29 f7  \\
+			\textbf{Binär} & 10001000 10000010 (...) 00101001 11110111\\
+			\textbf{Detail} & FIN = 1, RSV n. gesetzt \\
+			\textbf{opcode} & 0x8 \\ 
+			\textbf{Maskierung} & 1\\ 
+			\textbf{Payload length} & 2\\ 
+			\textbf{Payload (maskiert)} & )$\div$\\
+		\end{tabular}
+	\end{center}
+	\caption{Close-Frame initiiert von Client}
+	\label{fig:wsCloseFrameClient}
+\end{figure*}
+
+\begin{figure*}[ht]
+	\begin{center}
+		\begin{tabular}{l>{\arraybackslash}p{8.0cm}}
+			 &  \textbf{Server}  \\ 
+			\textbf{Byte} & 88 02 03 e8 \\
+			\textbf{Binär} & 10001000 00000010 00000011 11101000\\
+			\textbf{Detail} & FIN = 1, RSV n. gesetzt \\
+			\textbf{opcode} & 0x8 \\ 
+			\textbf{Maskierung} & 0\\ 
+			\textbf{Payload length} & 2\\ 
+			\textbf{Payload (unmaskiert)} & 1000 \\
+		\end{tabular}
+	\end{center}
+	\caption{Close-Frame Antwort des Servers}
+	\label{fig:wsCloseFrameServer}
+\end{figure*}
+
+\noindent Abbildung \ref{fig:wsCloseFrameClient} zeigt einen maskierten Close-Frame, der von einem Client abgesetzt wurde. Der maskierte Payload enthält dabei den Status-Code \textit{1000}. Dieser wurde in der Antwort des Servers ebenfalls zurückgemeldet. Hierbei handelt es sich um die Angabe \textit{Normal Closure}, welche besagt, dass die Verbindung ordnungsgemäß beendet wurde. Der RFC6455 definiert vier Status-Gruppen mit folgender Bedeutung \autocite[46]{fette_websocket_2011}:
+\begin{description}
+	\item[0-999] Dieser Bereich wird nicht genutzt.
+	\item[1000-2999] Diese Status-Codes sind für die Definition innerhalb des RFC6455 sowie für zukünftige Überarbeitungen und Erweiterungen reserviert.
+	\item[3000-3999] Status-Codes in diesem Bereich sind für Verwendung in Frameworks, Bibliotheken und Anwendungen gedacht und bedürfen einer Registrierung bei der Internet Assigned Numbers Authority (IANA).
+	\item[4000-4999] In diesem Bereich können eigene Status-Codes definiert werden. Diese benötigen keine Registrierung und müssen den kommunizierenden Anwendungen bekannt sein. 
+\end{description}
+
+\noindent Die Spezifikation des WebSocket-Protokolls definiert bereits einige Status-Codes innerhalb des zweiten Bereichs. Allerdings werden diese nur als Vorschlag angegeben, was inzwischen zu einem gewissen Wildwuchs und damit verbunden zu einigen Problemen führte \autocite[53]{gorski_websockets_2015}. Bisher wurden nur wenige Status-Codes neben jenen aus der Spezifikation registriert. Die bisher offiziellen Registrierungen finden sich auf den zugehörigen Seiten der IANA.\footnote{unter https://www.iana.org/assignments/websocket/} Tabelle \ref{tbl:wsCloseCodes} zeigt einen kurzen Auszug der wichtigsten Status-Codes. Es fällt auf, dass alle Neuregistrierungen durch Alexey Melnikov erfolgten, welcher bereits an der Spezifikation des Protokolls beteiligt war. In einer der betreffenden Anfragen zur Registrierung eines Status-Codes fragt Melnikov auch, ob diese Status-Codes denn überhaupt genutzt werden und ob noch ein Interesse an deren Registrierung besteht \autocite{melnikov_additional_2012}.
+
+\begin{table*}[ht]
+	\begin{center}
+		\begin{tabular}{|>{\centering\arraybackslash}p{1.2cm}|l|>{\arraybackslash}p{8.0cm}|l|}
+			\hline
+			Status-Code & Bedeutung &  Beschreibung & Spezifiert durch \\ \hline
+			1000 & Normal Closure & Zeigt einen ordnungsgemäßen Verbindungsabbau an. & RFC6455  \\ \hline
+			1002 & Protocol Error &  Der Endpunkt beendet die Verbindung aufgrund eines Protokollfehlers. Beispielsweise wird der Empfang einer nicht maskierten Nachricht von einem Server durch selbigen mit diesem Status-Code beendet. & RFC6455 \\ \hline
+			1006 & Abnormal Closure &  Dieser Status darf nicht in einem Close-Frame verwendet werden. Anwendungen können durch diesen signalisieren, dass die Verbindung unerwartet und auf unbekannte Weise beendet wurde.  & RFC6455 \\ \hline
+			1010 & Mandatory Ext. & Ein WebSocket-Client kann diesen Status-Code verwenden, wenn er die Verbindung aufgrund fehlender Erweiterungen beendet. Ein Server verwendet diesen Status-Code nicht, da er aufgrund mangelnder clientseitiger Erweiterungen den Opening-Handshake abbrechen kann. & RFC6455 \\ \hline
+			1012 & Service Restart & Gibt an, dass der Dienst neustartet. Verbundene Clients sollen im Falle einer Wiederherstellung der Verbindung eine zufällige Zeit zwischen 5-30 Sekunden warten \autocite{melnikov_additional_2012}. & Alexey Melnikov \\ \hline
+			1013 & Try Again Later & Signalisiert, dass der Dienst überlastet ist. Sollte das Ziel über mehrere IP-Adressen verfügen, kann eine andere verwendet werden. Ist nur eine IP-Adresse verfügbar, so soll der Benutzer entscheiden, ob er sich erneut verbinden möchte \autocite{melnikov_additional_2012}. & Alexey Melnikov \\ \hline
+		\end{tabular}
+		\caption{Auszug der registrierten Status-Codes}\label{tbl:wsCloseCodes}
+	\end{center}
+\end{table*}
+
+\subsection{WebSocket Kommunikation}\label{subsec:wsLifecycle}
+Lebenszyklus woop woop
 \subsubsection{Verbindungsaufbau}\label{subsubsec:wsOpen}
 \subsubsection{Datentransfer}\label{subsubsec:wsData}
 \subsubsection{Verbindungsabbau}\label{subsubsec:wsClose}
@@ -245,9 +329,9 @@ WebSocket Frames, von einem Client zu einem Server gesendet, müssen maskiert we
 \newpage
 \pagenumbering{Roman}
 \printbibliography
-
-%\newpage
-%\listoffigures
-%\listoftables
+\newpage
+\listoffigures
+\newpage
+\listoftables
 
 \end{document}
