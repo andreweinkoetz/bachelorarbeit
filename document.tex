@@ -131,7 +131,7 @@ Die Spezifikation eines WebSocket-Frames sieht eine Zweiteilung vor, wie sie bei
 		\caption{Vereinfachte Darstellung eines WebSocket Frames}
 	\end{center}
 \end{figure}
-Anhand des Aufbaus ist leicht erkennbar, dass die Kommunikation über WebSockets mit deutlich geringeren Paketgrößen arbeiten kann als HTTP. Eine Nachricht mit einfacher Längenangabe, die von Server zu Client geschickt wird, erzeugt durch ihren Header lediglich einen Overhead von zwei Byte. Da WebSocket-Frames auf umgekehrtem Weg zusätzlich noch maskiert werden müssen, entspricht die minimale Länge eines clientseitigen Frames sechs Byte . Im Vergleich dazu beträgt der Overhead bei einer einfachen GET-Anfrage über HTTP/1.1 beim Aufruf des Hosts unter cs.hm.edu 35 Byte. Die Angabe des Hostnamens in HTTP/1.1 ist obligatorisch und trägt maßgeblich zur Größe des HTTP-Frames bei \autocite[128]{leach_hypertext_1999}. 
+Anhand des Aufbaus ist leicht erkennbar, dass die Kommunikation über WebSockets mit deutlich geringeren Paketgrößen arbeiten kann als HTTP. Eine Nachricht mit einfacher Längenangabe, die von Server zu Client geschickt wird, erzeugt durch ihren Header lediglich einen Overhead von zwei Byte. Da WebSocket-Frames auf umgekehrtem Weg zusätzlich noch maskiert werden müssen, entspricht die minimale Länge eines clientseitigen Frames sechs Byte. Im Vergleich dazu beträgt der Overhead bei einer einfachen GET-Anfrage über HTTP/1.1 beim Aufruf des Hosts unter cs.hm.edu 35 Byte. Die Angabe des Hostnamens in HTTP/1.1 ist obligatorisch und trägt maßgeblich zur Größe des HTTP-Frames bei \autocite[128]{leach_hypertext_1999}. 
 
 \subsubsection{Header-Felder}\label{subsubsec:wsHeader}
 Im nachfolgenden Abschnitt werden die Felder sowie deren jeweilige Aufgabe detailliert erläutert:
@@ -238,15 +238,14 @@ Der Abbau einer WebSocket-Verbindung erfolgt durch den Versand eines Close-Frame
 
 \begin{figure*}[ht]
 	\begin{center}
-		\begin{tabular}{l>{\arraybackslash}p{8.0cm}}
-			& \textbf{Client}  \\ 
-			\textbf{Byte} & 88 82 (2a 1f fc f2) 29 f7  \\
-			\textbf{Binär} & 10001000 10000010 (...) 00101001 11110111\\
-			\textbf{Detail} & FIN = 1, RSV n. gesetzt \\
-			\textbf{opcode} & 0x8 \\ 
-			\textbf{Maskierung} & 1\\ 
-			\textbf{Payload length} & 2\\ 
-			\textbf{Payload (maskiert)} & )$\div$\\
+		\begin{tabular}{l>{\arraybackslash}p{9.0cm}}
+			\textbf{Byte} & \texttt{88 82 (2a 1f fc f2) 29 f7}  \\
+			\textbf{Binär} & \texttt{10001000 10000010 (...) 00101001 11110111}\\
+			\textbf{Detail} & \texttt{FIN = 1, RSV n. gesetzt} \\
+			\textbf{opcode} & \texttt{0x8} \\ 
+			\textbf{Maskierung} & \texttt{1}\\ 
+			\textbf{Payload length} & \texttt{2}\\ 
+			\textbf{Payload (maskiert)} & \texttt{)$\div$}\\
 		\end{tabular}
 	\end{center}
 	\caption{Close-Frame initiiert von Client}
@@ -256,14 +255,13 @@ Der Abbau einer WebSocket-Verbindung erfolgt durch den Versand eines Close-Frame
 \begin{figure*}[ht]
 	\begin{center}
 		\begin{tabular}{l>{\arraybackslash}p{8.0cm}}
-			 &  \textbf{Server}  \\ 
-			\textbf{Byte} & 88 02 03 e8 \\
-			\textbf{Binär} & 10001000 00000010 00000011 11101000\\
-			\textbf{Detail} & FIN = 1, RSV n. gesetzt \\
-			\textbf{opcode} & 0x8 \\ 
-			\textbf{Maskierung} & 0\\ 
-			\textbf{Payload length} & 2\\ 
-			\textbf{Payload (unmaskiert)} & 1000 \\
+			\textbf{Byte} & \texttt{88 02 03 e8} \\
+			\textbf{Binär} & \texttt{10001000 00000010 00000011 11101000}\\
+			\textbf{Detail} & \texttt{FIN = 1, RSV n. gesetzt} \\
+			\textbf{opcode} & \texttt{0x8} \\ 
+			\textbf{Maskierung} & \texttt{0}\\ 
+			\textbf{Payload length} & \texttt{2}\\ 
+			\textbf{Payload (unmaskiert)} & \texttt{1000} \\
 		\end{tabular}
 	\end{center}
 	\caption{Close-Frame Antwort des Servers}
@@ -278,7 +276,7 @@ Der Abbau einer WebSocket-Verbindung erfolgt durch den Versand eines Close-Frame
 	\item[4000-4999] In diesem Bereich können eigene Status-Codes definiert werden. Diese benötigen keine Registrierung und müssen den kommunizierenden Anwendungen bekannt sein. 
 \end{description}
 
-\noindent Die Spezifikation des WebSocket-Protokolls definiert bereits einige Status-Codes innerhalb des zweiten Bereichs. Allerdings werden diese nur als Vorschlag angegeben, was inzwischen zu einem gewissen Wildwuchs und damit verbunden zu einigen Problemen führte \autocite[53]{gorski_websockets_2015}. Bisher wurden nur wenige Status-Codes neben jenen aus der Spezifikation registriert. Die bisher offiziellen Registrierungen finden sich auf den zugehörigen Seiten der IANA.\footnote{unter https://www.iana.org/assignments/websocket/} Tabelle \ref{tbl:wsCloseCodes} zeigt einen kurzen Auszug der wichtigsten Status-Codes. Es fällt auf, dass alle Neuregistrierungen durch Alexey Melnikov erfolgten, welcher bereits an der Spezifikation des Protokolls beteiligt war. In einer der betreffenden Anfragen zur Registrierung eines Status-Codes fragt Melnikov auch, ob diese Status-Codes denn überhaupt genutzt werden und ob noch ein Interesse an deren Registrierung besteht \autocite{melnikov_additional_2012}.
+\noindent Die Spezifikation des WebSocket-Protokolls definiert bereits einige Status-Codes innerhalb des zweiten Bereichs. Allerdings werden diese nur als Vorschlag angegeben, was inzwischen zu einem gewissen Wildwuchs und damit verbunden zu einigen Problemen führte \autocite[53]{gorski_websockets_2015}. Bisher wurden nur wenige Status-Codes neben jenen aus der Spezifikation registriert. Die bisher offiziellen Registrierungen finden sich auf den zugehörigen Seiten der IANA.\footnote{unter https://www.iana.org/assignments/websocket/} Tabelle \ref{tbl:wsCloseCodes} (S.\pageref{tbl:wsCloseCodes}) zeigt einen kurzen Auszug der wichtigsten Status-Codes. Es fällt auf, dass alle Neuregistrierungen durch Alexey Melnikov erfolgten, welcher bereits an der Spezifikation des Protokolls beteiligt war. In einer der betreffenden Anfragen zur Registrierung eines Status-Codes fragt Melnikov auch, ob diese Status-Codes denn überhaupt genutzt werden und ob noch ein Interesse an deren Registrierung besteht \autocite{melnikov_additional_2012}.
 
 \begin{table*}[ht]
 	\begin{center}
@@ -296,13 +294,126 @@ Der Abbau einer WebSocket-Verbindung erfolgt durch den Versand eines Close-Frame
 	\end{center}
 \end{table*}
 
-\subsection{WebSocket Kommunikation}\label{subsec:wsLifecycle}
-Lebenszyklus woop woop
-\subsubsection{Verbindungsaufbau}\label{subsubsec:wsOpen}
-\subsubsection{Datentransfer}\label{subsubsec:wsData}
-\subsubsection{Verbindungsabbau}\label{subsubsec:wsClose}
+\subsection{WebSocket Kommunikationsphasen}\label{subsec:wsLifecycle}
+Das WebSocket-Protokoll basiert auf dem Transport Control Protocol (kurz: TCP) und durchläuft wie dieses verschiedene Phasen der Kommunikation. Zu Beginn wird ähnlich zu TCP ein Opening-Handshake zum Verbindungsaufbau durchgeführt. Auch am Ende der Datenübertragung wird ein solcher Handshake eingesetzt, um die Verbindung ordnungsgemäßg zu beenden. Die Ports, welche vom WebSocket-Protokoll verwendet werden, sind Port 80 (ungesicherte Verbindungen) und Port 443 (gesicherte Verbindungen). Aktuell wird deren Verwendung jedoch vom HTTP(S)-Protokoll dominiert und sie müssen daher geteilt werden. Der Verbindungsaufbau wird daher als HTTP-Upgrade Anfrage initiiert. Zukünftige Implementierungen könnten dies jedoch durch einen einfacheren Mechanismus über einen dedizierten Port ablösen, ohne das WebSocket-Protokoll umgestalten zu müssen \autocite[3]{fette_websocket_2011}. Im Folgenden Abschnitt werden die notwendigen Schritte zum Verbindungsaufbau und -abbau erläutert, sowie ein beispielhafter Ablauf der Übertragung über eine WebSocket-Verbindung gezeigt.
 
-\subsection{Vor- und Nachteile gegenüber Request}
+\subsubsection{Verbindungsaufbau}\label{subsubsec:wsOpen}
+Da Verbindungen über die Ports 80 bzw. 443 in den meisten Firewalls zugelassen werden, bedarf es keiner neuen Freigaben bei der Verwendung von WebSockets. Allerdings sind diese Ports oftmals durch einen HTTP-Server belegt. Aus diesem Grund bedarf es beim Aufbau einer WebSocket-Verbindung der Kooperation mit HTTP. Der Client sendet dazu einen HTTP-Upgrade-Request, der um spezielle Felder erweitert wurde.
+
+\begin{figure*}[ht]
+	\begin{center}
+		\begin{tabular}{l}
+		\texttt{GET /dako-backend/advancedchat HTTP/1.1} \\
+		\texttt{Host: localhost:8080} \\
+		\texttt{Connection: Upgrade} \\
+		\texttt{Upgrade: websocket} \\
+		\texttt{Origin: localhost:8080} \\
+		\texttt{Sec-WebSocket-Version: 13}\\
+		\texttt{Sec-WebSocket-Key: 1zUsRVYbBDvRKqqZq9cRsg==}\\
+		\texttt{Sec-WebSocket-Extensions: permessage-deflate; client\_max\_window\_bits}\\
+		(...)\vspace{-5mm}
+		\end{tabular}
+	\end{center}
+	\caption{Opening-Handshake des Clients}
+	\label{fig:wsOpenHandshakeClient}
+\end{figure*}
+
+\noindent Der Client stellt in Abbildung \ref{fig:wsOpenHandshakeClient} einen solchen HTTP-Upgrade-Request an den Endpunkt des WebSocket-Servers unter \texttt{localhost:8080}. Durch \texttt{Connection: Upgrade} wird dem Server mitgeteilt, dass auf ein anderes Protokoll gewechselt werden soll, in diesem Fall \texttt{websocket}. Die Versionsnummer entspricht den unterschiedlichen IETF Drafts. Über \texttt{Sec-WebSocket-Extensions} werden die Erweiterungen angefragt, die der Client unterstützt. Die übermittelte Erweiterung \texttt{permessage-deflate} wird in Kombination mit dem Parameter \texttt{client\_max\_window\_bits} angegeben, der die Sliding Window Größe limitiert, mit der der Client die Nachricht komprimiert. So kann der zu reservierende Speicherbedarf bei der serverseitigen Dekompression reduziert werden \autocite[18]{yoshino_compression_2015}. Der Client generiert den Base64-codierten \texttt{Sec-WebSocket-Key}, der anschließend vom Server zur Empfangsbestätigung des Handshakes verwendet wird. 
+
+\begin{figure*}[ht]
+	\begin{center}
+		\begin{tabular}{l}
+			\texttt{HTTP/1.1 101} \\
+			\texttt{Connection: Upgrade} \\
+			\texttt{Upgrade: websocket} \\
+			\texttt{Sec-WebSocket-Accept: mi8r8dWsVBJS1B3908SLbnd5tHM=}\\
+			\texttt{Sec-WebSocket-Extensions: permessage-deflate; client\_max\_window\_bits=15}\\
+			(...)\vspace{-5mm}
+		\end{tabular}
+	\end{center}
+	\caption{Opening-Handshake des Servers}
+	\label{fig:wsOpenHandshakeServer}
+\end{figure*}
+
+\noindent Damit der Server bestätigen kann, dass der Handshake eingetroffen ist, wird der  übermittelte \texttt{Sec-WebSocket-Key} mit dem Globally Unique Identifier (GUID) \texttt{258EAFA5-E914-47DA-95CA-C5A\\B0DC85B11} verbunden und ein SHA-1 Hashwert gebildet. Dieser Wert wird in einer Base64-Kodierung im Feld \texttt{Sec-WebSocket-Accept} übermittelt. Der Client kann beim Empfang der Nachricht anhand des gleichen Vorgehens einen SHA-1 Hash erzeugen und mit dem empfangenen vergleichen. 
+
+\begin{description}
+	\item[1. Kombinierter Wert] \texttt{1zUsRVYbBDvRKqqZq9cRsg==258EAFA5-E914-47DA-95CA-C5AB0DC85B11}
+	\item[2. SHA-1 Hashwert] \texttt{9A2F2BF1D5AC541252D41DFDD3C48B6E7779B473}
+	\item[3. Base64 Kodierung] \texttt{mi8r8dWsVBJS1B3908SLbnd5tHM=}
+\end{description}
+
+\noindent Des weiteren teilt der Server dem Client mit, dass die Erweiterung \texttt{permessage-deflate} unterstützt wird. Die maximale Größe eines Sliding Windows beträgt demnach $ 2^{15} \texttt{ Byte} =  32 \texttt{ KB}$. Als HTTP-Status wird der Code \texttt{101 Switching Protocols} angegeben. Dieser wird eingesetzt, um zu signalisieren, dass absofort das WebSocket-Protokoll genutzt wird. Weitere Anwendung findet dieser Status-Code beim Wechsel von HTTP-Versionen \autocite{leach_hypertext_1999}. Meldet der Server einen anderen Status, so wird angenommen, dass der WebSocket Handshake nicht vollständig durchgeführt werden konnte und die Semantik von HTTP gilt \autocite[7]{fette_websocket_2011}. Ebenso wird verfahren, wenn der vom Client ermittelte Hashwert nicht mit dem vom Server übertragenen \texttt{Sec-WebSocket-Accept} übereinstimmt.\\
+
+\noindent Optionale Felder können ebenfalls übertragen werden. Hierzu zählt beispielsweise das Header-Feld \texttt{Sec-WebSocket-Protocol}, das angibt welches Sub-Protokoll für die Übertragung genutzt werden soll. Hat der Server den Opening Handshake erfolgreich zurückgesendet, so gilt die WebSocket-Verbindung als geöffnet und Daten können gesendet werden.
+
+\subsubsection{Datentransfer}\label{subsubsec:wsData}
+Befindet sich die WebSocket-Verbindung nach dem erfolgreichen Opening-Handshake im Status \texttt{OPEN}, so können Daten gesendet werden. Wie in Abschnitt \ref{subsubsec:wsHeader} erläutert, definiert das Header-Feld \texttt{opcode} eines WebSocket-Frames die übertragene Art von Nutzdaten. Aktuell sind lediglich Text- und Binärdaten offiziell spezifiert. 
+
+\begin{figure*}[ht]
+	\begin{center}
+		\begin{tabular}{ll}
+			\textbf{Byte} & 81 0e [57 65 62 53 6f 63 6b 65 74 20 32 30 31 38] \\
+			\textbf{Header} & FIN = 1, RSV = 0, opcode = 0x1, Payload length = 14 \\
+			 \textbf{[Payload]} & WebSocket 2018 \\
+		\end{tabular}
+	\vspace{-5mm}
+	\end{center}
+	\caption{Datentransfer von Server zu Client}
+	\label{fig:wsDataTransfer}
+\end{figure*}
+
+\noindent In Abbildung \ref{fig:wsDataTransfer} ist eine Nachricht mit dem Inhalt \texttt{WebSocket 2018} von einem Server an einen Client gesendet worden. Als \texttt{opcode} wurde \texttt{0x1} angegeben, welcher besagt, dass es sich bei der Art des Payloads um eine Textnachricht handelt. Die Größe der Nutzdaten beträgt 14 Byte und die Nachricht konnte ohne Fragmentierung vollständig übertragen werden.
+
+\subsubsection{Verbindungsabbau}\label{subsubsec:wsClose}
+Der Abbau einer WebSocket-Verbindung erfolgt anhand eines Closing-Handshakes. Er soll den \texttt{FIN/ACK} Closing-Handshake von TCP ergänzen, da dieser insbesondere bei der Verwendung von Proxy Servern oder Vermittlungsstellen nicht garantiert zwischen genau zwei Endpunkten abläuft \autocite[9]{fette_websocket_2011}. Laut RFC6455 sollen so Szenarien vermieden werden, in denen Daten unnötigerweise verloren gehen. \\
+
+\noindent Die Einleitung eines Verbindungsabbaus kann sowohl vom Client, als auch vom Server erfolgen. Dazu wird ein Frame mit dem \texttt{opcode}-Wert \texttt{0x8} an den Kommunikationspartner versendet. Der versendende Endpunkt wechselt mit dem Absenden des Closing-Frames vom \texttt{OPEN} in den \texttt{CLOSING} Status. Ebenso gilt dies beim Empfang eines Closing-Frames insofern selbst noch keiner versendet wurde. Danach eintreffende oder zu sendende Nachrichten müssen verworfen werden. Haben beide Endpunkte sowohl einen Closing-Frame gesendet, als auch empfangen, so gilt die Verbindung als beendet und die darunterliegende TCP-Verbindung kann geschlossen werden. Dies sollte stets vom Server begonnen werden, damit er im \texttt{TIME WAIT} Status verbleibt. Der Client kann so die Verbindung durch das Senden eines neuen \texttt{SYN} unverzüglich wieder eröffnen \autocite[41]{fette_websocket_2011}. \\
+
+\begin{figure}[ht] 
+	\begin{center}
+		\includegraphics[scale=1]{img/closehandshake.pdf}
+		\caption{Clientseitiger Closing-Handshake}
+		\label{fig:wsClosingHandshake}
+	\end{center}
+\end{figure}
+
+\noindent Abbildung \ref{fig:wsClosingHandshake} zeigt den schematischen Ablauf des Closing-Handshakes. Der Client initiiert diesen, indem er einen Closing-Frame mit dem Statuscode 1000 versendet. Der Server reagiert mit einer entsprechenden Antwort, wobei der Status aus dem ersten Frame übernommen wurde. Nachdem der Closing-Handshake abgeschlossen wurde befinden sich beide Endpunkte im Status \texttt{CLOSED} und die zugrundeliegende TCP-Verbindung kann beendet werden.
+
+\subsection{Alternative Verfahren}\label{subsubsec:AlternativeVerfahren}
+Die Kommunikation mittels HTTP basiert auf einem Request/Response Verfahren. Dabei sendet immer der Client eine Anfrage an einen Server. Dieser antwortet mit einer Statuszeile und entsprechendem Statuscode. Anschließend gilt die Übertragung als beendet und kann durch eine erneute Anfrage des Clients neu gestartet werden. Eine Möglichkeit Daten vom Server an den Client zu senden, ist in der Spezifikation von HTTP nicht vorgesehen. Verändert sich der Zustand einer serverseitigen Ressource, so kann der Client darüber bei einer reinen HTTP-Verbindung nur durch erneutes Anfragen informiert werden. Allerdings benötigen viele Anwendungsfälle diese Funktion. Aus diesem Grund wurde eine Vielzahl von Verfahren entwickelt, die diese Mechanismen abbilden sollen. Im Folgenden werden einige dieser Verfahren kurz vorgestellt und hinsichtlich ihrer Vor- und Nachteile gegenüber WebSocket analysiert.\\
+
+\subsubsection{Polling}
+Durch die vom W3C standardisierte API XMLHttpRequest (XHR) wurde im Jahr 2012 eine Möglichkeit geschaffen, mittels JavaScript HTTP-Requests zu konstruieren \autocite{whatwg_xmlhttprequest_2006}. Ein XHR-Objekt registriert verschiedene Methoden, welche bei einer Änderung des Objekts asynchron aufgerufen werden. Dadurch können Anfragen gesendet werden, ohne den weiteren Programmablauf zu blockieren. Dies bildet die technische Grundlage vieler moderner Web-Frontends, die unter dem Oberbegriff Ajax (\textit{Asynchronous JavaScript and XML}) zusammengefasst werden \autocite[26]{gorski_websockets_2015}. \\
+
+\noindent Beim Polling-Verfahren wird eine Anfrage an den Server in festgelegten Zeitabständen wiederholt. Durch die Verwendung eines XHR-Objekts blockiert die Anwendung zwischen dem Absenden und Empfang der Serverantwort nicht. Liegt keine Änderung vor, so sendet der Server eine leere Antwort zurück. \\
+
+\noindent Dieses Verfahren wird von allen Browsern unterstützt und bedarf keiner besonderen Kenntnisse. Allerdings ist der erzeugte Overhead je nach Einsatzszenario nicht zu unterschätzen. Auch die Belastung des Servers bei der Verarbeitung der eintreffenden Anfragen kann problematisch sein. Treten demnach viele Änderungen in kurzen Zeitabständen auf, so ist von der Verwendung eines einfachen Polling-Verfahrens abzuraten.
+
+\subsubsection{Long-Polling}\label{subsubsec:Long-Polling}
+Die regelmäßigen Abfragen des einfachen Pollings führen zu einem enormen Overhead. Um diesen zu reduzieren wird beim Long-Polling nur eine Antwort vom Server zurückgesendet, wenn eine Änderung vorliegt. Der Client reagiert umgehend mit einem neuen Request auf die Antwort des Servers. Die Verbindung bleibt dabei geöffnet, solange keine Änderung auftritt. Läuft die vordefinierte Wartezeit ab, so antwortet der Server auch hier mit einer leeren Nachricht \autocite[29]{gorski_websockets_2015}. \\
+
+\noindent Das Long-Polling reduziert den Overhead gegenüber dem einfachen Polling-Mechanismus deutlich. Auf Grund des sofortigen Wiederaufbaus durch den Client wird eine nahezu andauernde Verbindung simuliert. Dennoch ist auch in diesem Fall der Overhead deutlich größer als bei der Verwendung einer WebSocket-Verbindung. Mit steigender Frequenz von Nachrichten nähert sich dieser an den Overhead des einfachen Pollings.
+
+\subsubsection{Comet}\label{subsubsec:Comet}
+Auf Grund diverser Limitierungen für Mehrbenutzeranwendungen, entwickelten sich Programmiermodelle, welche unter der Bezeichnung \textit{Comet} \autocite{russell_comet_2006} zusammengefasst wurden. Da es sich hierbei nicht um einen spezifizierten Standard handelt, wurde im Rahmen des CometD-Projekts der Dojo Foundation das Bayeux-Protokoll ins Leben gerufen. Ziel des Projekts ist die Reduzierung der Komplexität bei der Implementierung von Comet Anwendungen \autocite{russell_cometd_2007}. Um dies zu erreichen wurden Referenzimplementierungen des Bayeux-Protokolls in verschiedenen Programmiersprachen bereitgestellt. \\
+
+\noindent Neben der Verwendung des Long-Polling Mechanismus zur ereignisgesteuerten Nachrichtenübertragung von Server zu Client, sieht das Bayeux-Protokoll auch Streaming-Techniken vor. Dabei wird die HTTP-Verbindung nach der Antwort des Servers auf den Request des Clients nicht geschlossen, sondern anhand des Connection-Headers \texttt{keep-alive} weiterhin offen gehalten. Somit können weitere Nachrichten vom Server an den Client gesendet werden, ohne dass eine erneute Anfrage durch den Client gestellt werden muss. \\
+
+\begin{figure}[ht] 
+	\begin{center}
+		\includegraphics[scale=1]{img/bayeuxstream.pdf}
+		\caption{HTTP-Streaming im Bayeux-Protokoll}
+		\label{fig:wsBayeuxStream}
+	\end{center}
+\end{figure}
+
+\noindent Allerdings muss die Verwendung von HTTP-Streaming von den User Agenten unterstützt werden, da unvollständige HTTP Responses für dieses Verfahren genutzt werden \autocite{russell_cometd_2007}. Um bidirektional kommunizieren zu können verwendet das Bayeux-Protokoll zwei HTTP-Verbindungen, wohingegen das WebSocket-Protokoll mit einer einzigen Verbindung arbeitet. Der größte Nachteil des Bayeux-Protokolls ist jedoch die fehlende Standardisierung durch eine etablierte Organisation. 
+
+\subsubsection{Server-Sent Events}\label{subsubsec:Server-SentEvents}
+Die bislang vorgestellten Verfahren bieten keine standardisierte API, die es Servern ermöglicht Daten über HTTP an eine Website zu senden. In HTML5 wurde dafür vom W3C die sogenannten \textit{Server-Sent Events (SSE)} eingeführt, welche ein \texttt{EventSource}-Objekt bereitstellen. Dieses sorgt auf der Clientseite dafür, dass Benachrichtigungen des Servers empfangen werden können. Dazu stellt der Browser drei Event-Handler bereit, die DOM-Events an die Anwendung weiterleiten \autocite[31]{gorski_websockets_2015}. Bei der Öffnung einer SSE-Verbindung wird der Event-Handler \texttt{onopen} aufgerufen, im Falle eines Fehlers der \texttt{onerror}-Handler. Kommen Nachrichten des Servers an, so wird der \texttt{onmessage}-Handler aktiviert \autocite{hickson_server-sent_2009}. Zu jedem Event-Handler werden entsprechende Methoden registriert, welche die Bearbeitung des jeweiligen Events übernehmen.\\
+
+\noindent Server-Sent Events erzeugen keinen Overhead durch wiederholte Anfragen an den Server. Die Kommunikation von Server zu Client wird ermöglicht, ohne mehrere HTTP-Verbindungen zu öffnen. Allerdings handelt es sich hier um einen unidirektionalen Kanal von Server zu Client. Dies ist für Anwendungsfälle ausreichend, in denen lediglich der Server Informationen zu übermitteln hat. Beispiele hierfür wären u.a. das Hardware-Monitoring eines Server oder ein Newsticker. Sollen jedoch Daten in beide Richtungen übertragen werden, so ist die Verwendung von WebSockets die bessere Alternative. Insbesondere Mehrbenutzeranwendungen wie Spiele oder Chats, die auf kurze Latenzen angewiesen sind, profitieren von derem bidirektionalem Kommunikationskanal.
 
 \section{Die WebSocket API}\label{sec:WebSocketAPI}
 \subsection{Client-seitige Implementierung}
