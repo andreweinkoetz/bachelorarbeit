@@ -122,7 +122,7 @@ Die Anforderungen an Webanwendungen haben sich in den vergangenen Jahren stark v
 
 \newpage
 \section{Das WebSocket Protokoll}\label{sec:WebSocketProtokoll}
-Die Arbeit an der Spezifikation des WebSocket Protokolls begann bereits 2009, als es von Google in Zusammenarbeit mit Apple, Microsoft und Mozilla im Rahmen ihrer Kooperation WHATWG\footnote{Web Hypertext Application Technology Working Group unter: www.whatwg.org} der Internet Engineering Task Force (IETF) vorgeschlagen wurde. Bis Mai 2010 wurden noch zahlreiche Verbesserungen hinzugefügt, bis es schließlich in Version 76 \autocite{hickson_websocket_2010} im August 2010 an die BiDirectional or Server-Initiated HTTP (HyBi) Task Force der IETF zur Weiterentwicklung übergeben wurde \autocite{fette_websocket_2010}. Neben vielen anderen Fortschritten wurde das Protkoll um die Möglichkeit erweitert binäre Dateien auszutauschen, sowie Sicherheitslücken geschlossen, die in Verbindung mit Proxy-Servern entstehen konnten. Im Dezember 2010 wurde das WebSocket Protokoll von der IETF zu dem Request for Comment (RFC) 6455 erklärt \autocite{fette_websocket_2011}. Dieser definiert auf über 70 Seiten neben dem Lebenszyklus und den verschiedenen Frames der WebSockets noch zahlreiche weitere technische Details und Defintionen. In diesem Kapitel sollen die wichtigsten Grundlagen der Protokollspezifikation dargelegt werden.
+Die Arbeit an der Spezifikation des WebSocket Protokolls begann bereits 2009, als es von Google in Zusammenarbeit mit Apple, Microsoft und Mozilla im Rahmen ihrer Kooperation WHATWG\footnote{Web Hypertext Application Technology Working Group unter: www.whatwg.org} der Internet Engineering Task Force (IETF) vorgeschlagen wurde. Bis Mai 2010 wurden noch zahlreiche Verbesserungen hinzugefügt, bis es schließlich in Version 76 \autocite{hickson_websocket_2010} im August 2010 an die BiDirectional or Server-Initiated HTTP (HyBi) Task Force der IETF zur Weiterentwicklung übergeben wurde \autocite{fette_websocket_2010}. Neben vielen anderen Fortschritten wurde das Protkoll um die Möglichkeit erweitert binäre Dateien auszutauschen, sowie Sicherheitslücken geschlossen, die in Verbindung mit Proxy-Servern entstehen konnten. Im Dezember 2010 wurde das WebSocket Protokoll von der IETF zu dem Request for Comment (RFC) 6455 erklärt \autocite{fette_websocket_2011}. Dieser definiert auf über 70 Seiten neben den Kommunikationsphasen und verschiedenen Frames der WebSockets noch zahlreiche weitere technische Details und Defintionen. In diesem Kapitel sollen die wichtigsten Grundlagen der Protokollspezifikation dargelegt werden.
 \subsection{WebSocket-Frames}\label{subsec:wsFrames}
 Die Spezifikation eines WebSocket-Frames sieht eine Zweiteilung vor, wie sie bei Protokollnachrichten üblicherweise vorgenommen wird. Ein WebSocket-Frame besteht demnach aus einem Header Bereich der Kontrolldaten enthält, sowie dem Payload, welcher die Nutzdaten beinhaltet.\vspace{2mm}
 \begin{figure}[ht] \label{fig:wsFrame}
@@ -413,11 +413,94 @@ Auf Grund diverser Limitierungen für Mehrbenutzeranwendungen, entwickelten sich
 \subsubsection{Server-Sent Events}\label{subsubsec:Server-SentEvents}
 Die bislang vorgestellten Verfahren bieten keine standardisierte API, die es Servern ermöglicht Daten über HTTP an eine Website zu senden. In HTML5 wurde dafür vom W3C die sogenannten \textit{Server-Sent Events (SSE)} eingeführt, welche ein \texttt{EventSource}-Objekt bereitstellen. Dieses sorgt auf der Clientseite dafür, dass Benachrichtigungen des Servers empfangen werden können. Dazu stellt der Browser drei Event-Handler bereit, die DOM-Events an die Anwendung weiterleiten \autocite[31]{gorski_websockets_2015}. Bei der Öffnung einer SSE-Verbindung wird der Event-Handler \texttt{onopen} aufgerufen, im Falle eines Fehlers der \texttt{onerror}-Handler. Kommen Nachrichten des Servers an, so wird der \texttt{onmessage}-Handler aktiviert \autocite{hickson_server-sent_2009}. Zu jedem Event-Handler werden entsprechende Methoden registriert, welche die Bearbeitung des jeweiligen Events übernehmen.\\
 
-\noindent Server-Sent Events erzeugen keinen Overhead durch wiederholte Anfragen an den Server. Die Kommunikation von Server zu Client wird ermöglicht, ohne mehrere HTTP-Verbindungen zu öffnen. Allerdings handelt es sich hier um einen unidirektionalen Kanal von Server zu Client. Dies ist für Anwendungsfälle ausreichend, in denen lediglich der Server Informationen zu übermitteln hat. Beispiele hierfür wären u.a. das Hardware-Monitoring eines Server oder ein Newsticker. Sollen jedoch Daten in beide Richtungen übertragen werden, so ist die Verwendung von WebSockets die bessere Alternative. Insbesondere Mehrbenutzeranwendungen wie Spiele oder Chats, die auf kurze Latenzen angewiesen sind, profitieren von derem bidirektionalem Kommunikationskanal.
+\noindent Server-Sent Events erzeugen keinen Overhead durch wiederholte Anfragen an den Server. Die Kommunikation von Server zu Client wird ermöglicht, ohne mehrere HTTP-Verbindungen zu öffnen. Allerdings handelt es sich hier um einen unidirektionalen Kanal von Server zu Client. Dies ist für Anwendungsfälle ausreichend, in denen lediglich der Server Informationen zu übermitteln hat. Beispiele hierfür wären u.a. das Hardware-Monitoring eines Server oder ein Newsticker. Sollen jedoch Daten in beide Richtungen übertragen werden, so ist die Verwendung von WebSockets die bessere Alternative. Insbesondere Mehrbenutzeranwendungen wie Spiele oder Chats, die auf kurze Latenzen angewiesen sind, profitieren von derem bidirektionalem Kommunikationskanal. \\
 
-\section{Die WebSocket API}\label{sec:WebSocketAPI}
+\noindent Die Vielfalt der Alternativen lässt darauf schließen, dass ein Bedarf für eine standardisierte Methode besteht, mit der Daten zwischen Client und Server bidirektional übertragen werden können. Dieser Bedarf führte zur Einführung der WebSockets, die als einzige auch für die Übertragung binärer Daten geeignet sind.
+\newpage
+\section{Die WebSocket-API}\label{sec:WebSocketAPI}
+Neben der Protokollspezifikation durch das Standardisierungsgremium IETF, wurde auch eine passende API für die Verwendung von WebSockets definiert. Da es sich hierbei um eine Webtechnologie handelt die in Browsern Anwendung findet, obliegt deren Spezifierung dem W3C. Der erste Working Draft vom 23. April 2009 wurde von Ian Hickson eingereicht, einem der führenden Entwickler der Protokollspezifikation \autocite{hickson_web_2009}. Darin werden alle benötigten Eigenschaften und Funktionen der WebSocket-Schnittstelle definiert. Die Beschreibung erfolgt anhand der \textit{Web Interface Description Language} (\textit{Web IDL}), einer formalen Darstellung, die an die sprachlichen Konstrukte von ECMAScript bzw. JavaScript angelehnt ist. Dabei handelt es sich um eine Programmiersprache, die 1995 von Netscape Communications entwickelt und durch die European Computer Manufacturers Association (ECMA) unter der Bezeichnung ECMAScript standardisiert wurde \autocite{peyrott_brief_2017}. Die folgenden Beispiele beziehen sich auf die aktuelle Version 8, die im Juni 2017 offiziell freigegeben wurde. Im weiteren Verlauf wird die geläufigere Bezeichnung JavaScript verwendet.\\
+
+\noindent Die WebSocket-API beschränkt sich allerdings nicht nur auf JavaScript. Verschiedene Implementierungen des Standards ermöglichen dem Entwickler, WebSockets in seiner bevorzugten Programmiersprache zu nutzen. Laut des PopularitY of Programming Language (PYPL) Index ist Java der Oracle Corporation die weltweit beliebteste Programmiersprache \autocite{cabonnelle_pypl_2017}. Sie wurde 1990 von James Gosling mit seinem Team bei dem Unternehmen Sun Computers entwickelt. Die erste öffentlich zugängliche Version wurde 1995 veröffentlicht \autocite{smyth_brief_2009}. Aktuell ist Java in Version 9 verfügbar. Soll eine neue Technologie in den Standardumfang von Java aufgenommen werden, so muss diese den Community Prozess (JCP) durchlaufen. \\
+
+% Vorgangsgrafik aufnehmen
+
+\noindent In Phase 1 können Mitglieder des JCP einen Vorschlag zur Aufnahme einer Erweiterung machen. Diese werden als \textit{Java Specification Request} (JSR) bezeichnet. Wird der JSR vom \textit{Executive Committee} (EC) angenommen, so wird in Phase 2 eine Expertengruppe gebildet, die einen Early Draft erstellt. Darauf aufbauend entwickelt diese Gruppe einen Public Draft, der in Phase 3 öffentlich eingesehen und kommentiert werden kann. Der Entwurf wird dann entsprechend überarbeitet und eine finale Version eingereicht. Zudem wird eine Referenzimplementierung (RI)  und das Technology Compatibility Kit (TCK) erstellt, welches Tests und Tools bereitstellt um Implementierungen auf Konformität mit dem JSR zu prüfen. Abschließend stimmt das EC noch über die Aufnahme in die Standardbibliothek ab. Befindet sich der JSR dann im produktiven Betrieb, können in Phase 4 Updates und Änderungen des JSR beantragt und eingepflegt werden \autocite{oracle_corporation_java_2017}.  \\
+
+\noindent Der JSR 356, trägt die Bezeichnung Java\texttrademark API for WebSocket und regelt die Aufnahme der WebSocket-Technologie in die Standardbibliothek der Java Enterprise Edition (JEE). Er befindet sich aktuell in der 4. Phase und ist seit dem 22. Mai 2013 offizieller Bestandteil seit JEE 7. Die folgenden Beispiele verwenden die achte Version von Java.
+
+\subsection{HTML Standard WebSocket }
+\noindent Das Erstellen eines WebSocket-Endpunkts erfolgt laut Spezifikation anhand des Konstruktors. Dieser empfängt die URL, zu welcher der Endpunkt sich verbinden soll und legt diese im read-only Attribut \texttt{url} ab. Optional empfängt der Konstruktor einen String oder ein String-Array, welches die unterstützten Sub-Protokolle enthält. Wird die URL nicht im korrekten Schema angegeben, so wird eine \texttt{DOMException} mit der Beschreibung \texttt{SyntaxError} ausgelöst. Falls Sub-Protokolle angegeben werden, so sendet der Client diese bei der Anfrage im HTTP-Headerfeld \texttt{Sec-WebSocket-Protocol}. Wenn Server und Client ein gemeinsames Protokoll vereinbaren konnten, wird es im schreibgeschützten Attribut \texttt{protocol} abgelegt. Etwaige Erweiterungen werden nach dem erfolgreichen Verbindungsaufbau im Attribut \texttt{extensions} abgelegt.
+
+\subsubsection{Zustand}
+Jede WebSocket-Verbindung unterliegt einem Lebenszyklus. Die Spezifikation unterscheidet hier vier mögliche Zustände, die als konstante Zahlenwerte hinterlegt sind. Je nachdem in welchem Zustand sich der WebSocket gerade befindet, wird der Wert einer dieser Konstanten im Attribut \texttt{readyState} abgelegt \autocite{whatwg_html_2010}. 
+
+\begin{figure}[ht] 
+	\begin{center}
+		\includegraphics[scale=0.75]{img/wslifecycle.pdf}
+		\caption{UML-Zustandsdiagramm des WebSocket Lifecycle}
+		\label{fig:wsAPIZustand}
+	\end{center}
+\end{figure}
+
+\subsubsection{Verbindung}
+Die Zustände eines WebSockets werden durch Events beeinflusst, die während der Kommunikation mit einem Endpunkt eintreffen. Diese werden von Event-Handlern empfangen und können anschließend verarbeitet werden. Die WebSocket API definiert die vier Event-Handler \texttt{onopen}, \texttt{onerror}, \texttt{onmessage} und \texttt{onclose}. Ein erfolgreicher Verbindungsaufbau löst das Event \texttt{open} aus, welches vom Event-Handler \texttt{onopen} verarbeitet wird. Fehler werden vom \texttt{onerror}-Event-Handler signalisiert. Wurde die Verbindung geschlossen oder konnte nicht geöffnet werden, so wird der \texttt{onclose}-Event-Handler ausgelöst. \\
+
+\noindent Die Verbindung wird durch den Kontruktor aufgebaut und durch die \texttt{close()}-Methode geschlossen. Das Schließen kann zudem optional mit Angabe eines Status-Codes (Tabelle \ref{tbl:wsCloseCodes}, S.\pageref{tbl:wsCloseCodes}) und einer textuellen Begründung erfolgen.
+
+\subsubsection{Nachrichten}
+Empfangene Nachrichten können mittels des \texttt{onmessage}-Event-Handlers an die Anwendung weitergegeben werden. Entsprechend der Spezifikation des RFC6455 ermöglicht die WebSocket API das Senden von textuellen und binären Daten. Zur Unterscheidung verschiedener Arten binärer Daten stellt sie die Enumeration \texttt{BinaryType} bereit. Diese enthält die Werte \texttt{blob} und \texttt{ArrayBuffer}. Die Übermittlung der Daten erfolgt durch die Methode \texttt{send()}. Bei deren Aufruf wird das Attribut \texttt{bufferedAmount} um die Anzahl Bytes erhöht, die nicht in das Netzwerk übermittelt werden konnten \autocite{whatwg_html_2010}.
+
 \subsection{Client-seitige Implementierung}
+Die standardisierte WebSocket-API fokussiert die Entwicklung browserbasierter Applikationen mit JavaScript. Für eine Richt-Client Applikation in Java kann die Open-Source Referenzimplementierung \textit{Tyrus} von Oracle verwendet werden. Die Bereitstellung erfolgt über eine Maven Abhängigkeit: 
+\vspace{-4mm}
+\begin{center}\parbox{0pt}{
+	\begin{tabbing}
+		\texttt{<depen}\=\texttt{dency>}\\
+		\><\texttt{groupId>org.glassfish.tyrus.bundles</groupId>}\\
+		\>\texttt{<artifactId>tyrus-standalone-client</artifactId>}\\
+		\>\texttt{<version>1.12</version>}\\
+		\texttt{</dependency>}
+	\end{tabbing}}
+\end{center}
+
+\noindent Im Folgenden wird das aktuellste stabile Release 1.12 von Tyrus verwendet. Die Java\texttrademark API for WebSocket kann auf zwei unterschiedliche Weisen verwendet werden. Der programmatische Ansatz sieht die Vererbung der \texttt{Endpoint} Klasse der API vor. Dabei müssen u.a. die Methoden der Oberklasse überschrieben und Funktionen auf Events registriert werden. Annotationen transformieren einfache Java-Objekte zu WebSocket Endpunkten \autocite[9]{coward_java_2014}:\\
+
+\begin{figure*}[ht]
+	\begin{center}
+		\begin{tabular}{>{\arraybackslash}p{7cm}l}
+			\textbf{Programmatisch} & \textbf{Annotationen} \\
+			\texttt{public class MyWebSocketServer} & \texttt{@ServerEndpoint("{}/path"{})} \\
+		 \texttt{extends Endpoint\{ ... \}}	& \texttt{public class MyWebSocketServer\{ ... \}}
+		\end{tabular}
+	\end{center}
+	\label{fig:wsAPIProgrAnnot}
+\end{figure*}
+
+\noindent Die nachfolgenden Code-Beispiele sind immer annotations-basiert, aufgrund besserer Lesbarkeit, verkürzter Schreibweise und der einfachen Verständlichkeit. \\
+
+\noindent Zunächst soll gezeigt werden, wie die Erzeugung eines WebSockets implementiert wurde. 
+Die JavaScript Implementierung entspricht dabei den Angaben aus der Spezifikation, wohingegen in Java zunächst ein Container-Objekt erstellt wird, welches anschließend zum Verbindungsaufbau verwendet wird.
+\begin{center}
+\noindent\textbf{JavaScript}\\
+\noindent\texttt{var ws = new WebSocket(in DOMString url,
+	in optional DOMString[] protocols);}
+\end{center}
+\begin{center}
+	\noindent\textbf{Java}\\
+	\noindent\texttt{WebSocketContainer wsc = ContainerProvider.\textit{getWebSocketContainer()};}\\
+	\noindent\texttt{wsc.connectToServer(Object clientEndpoint, URI hostPath);}\\
+\end{center}
+
+\noindent Die Erstellung des Objekts ist in beiden Fällen nur dann erfolgreich, wenn die WebSocket-Verbindung aufgebaut werden konnte. Der WebSocket befindet sich anschließend im Status \texttt{OPEN}.
+
+\subsubsection{Zustand}
+
+\subsubsection{Verbindung}
+\subsubsection{Nachrichten}
 \subsection{Server-seitige Implementierung}
+
+\subsection{En-/Decoding}
+
 
 \section{Fachliche Anforderungen}
 \subsection{Analyse des DaKo-Frameworks}
