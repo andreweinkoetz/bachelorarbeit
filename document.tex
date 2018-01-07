@@ -24,6 +24,7 @@
 \usepackage{colortbl}
 \usepackage{color}
 \usepackage{listings}
+\usepackage{hyperref}
 
 \definecolor{lightgray}{rgb}{.9,.9,.9}
 \definecolor{darkgray}{rgb}{.4,.4,.4}
@@ -106,9 +107,9 @@
 \begin{document}
   % Keine Seitenzahlen im Vorspann
   \pagestyle{empty}
-\renewcommand{\thelstlisting}{\arabic{section}-\arabic{lstlisting}}
+  \renewcommand{\thelstlisting}{\arabic{section}-\arabic{lstlisting}}
   % Titelblatt der Arbeit
-  \begin{titlepage}
+\begin{titlepage}
 
 \begin{center}
 	\includegraphics[scale=0.20]{img/hm-logo.eps}
@@ -475,7 +476,7 @@ Das Erstellen eines WebSocket-Endpunkts erfolgt laut Spezifikation anhand des Ko
 \end{lstlisting}
 
 \noindent Wird die URL nicht im korrekten Schema angegeben, so wird eine \texttt{DOMException} mit der Beschreibung \texttt{SyntaxError} ausgelöst. Falls Sub-Protokolle angegeben werden, so sendet der Client diese bei der Anfrage im HTTP-Headerfeld \texttt{Sec-WebSocket-Protocol}. Wenn Server und Client ein gemeinsames Protokoll vereinbaren konnten, wird es im schreibgeschützten Attribut \texttt{protocol} abgelegt. Etwaige Erweiterungen werden nach dem erfolgreichen Verbindungsaufbau im Attribut \texttt{extensions} abgelegt.
-\subsubsection*{WebSocket Lebenszyklus}
+\subsubsection{WebSocket Lebenszyklus}
 Jede WebSocket-Verbindung unterliegt einem Lebenszyklus. Die Spezifikation unterscheidet hier vier mögliche Zustände, die als konstante Zahlenwerte hinterlegt sind. Je nachdem in welchem Zustand sich der WebSocket gerade befindet, wird der Wert einer dieser Konstanten im Attribut \texttt{readyState} abgelegt \autocite{whatwg_html_2010}. \newpage
 \begin{figure}[ht] 
 	\begin{center}
@@ -495,7 +496,7 @@ Jede WebSocket-Verbindung unterliegt einem Lebenszyklus. Die Spezifikation unter
 	console.log(ws.readyState); // 3 = CLOSED
 \end{lstlisting}
 
-\subsubsection*{Event-Handling}
+\subsubsection{Event-Handling}
 Die Zustände eines WebSockets werden durch Events beeinflusst, die während der Kommunikation mit einem Endpunkt eintreffen. Diese werden von Event-Handlern empfangen und können anschließend verarbeitet werden. Die WebSocket API definiert die vier Event-Handler \texttt{onopen}, \texttt{onerror}, \texttt{onmessage} und \texttt{onclose}. Ein erfolgreicher Verbindungsaufbau löst das Event \texttt{open} aus, welches vom Event-Handler \texttt{onopen} verarbeitet wird. Fehler werden vom \texttt{onerror}-Event-Handler signalisiert. Wurde die Verbindung geschlossen oder konnte nicht geöffnet werden, so wird der \texttt{onclose}-Event-Handler ausgelöst. \\
 
 \begin{lstlisting}[frame=single, language=JavaScript, caption=WebSocket Event-Handler]
@@ -519,7 +520,7 @@ Die Zustände eines WebSockets werden durch Events beeinflusst, die während der
 		console.log("Grund: " + e.reason);
 	}
 \end{lstlisting} \vspace{-4mm}
-\subsubsection*{Kommunikation}
+\subsubsection{Kommunikation}
 Empfangene Nachrichten können mittels des \texttt{onmessage}-Event-Handlers an die Anwendung weitergegeben werden. Entsprechend der Spezifikation des RFC6455 ermöglicht die WebSocket API das Senden von textuellen und binären Daten. Zur Unterscheidung verschiedener Arten binärer Daten stellt sie die Enumeration \texttt{BinaryType} bereit. Diese enthält die Werte \texttt{blob} und \texttt{ArrayBuffer}. Die Übermittlung der Daten erfolgt durch die Methode \texttt{send()}. Bei deren Aufruf wird das Attribut \texttt{bufferedAmount} um die Anzahl Bytes erhöht, die nicht in das Netzwerk übermittelt werden konnten \autocite{whatwg_html_2010}. \\
 
 \begin{lstlisting}[frame=single, language=JavaScript, caption=WebSocket Nachrichten senden]
@@ -546,7 +547,7 @@ Soll eine neue Technologie in den Standardumfang von Java aufgenommen werden, so
 
 \noindent Der JSR 356 trägt die Bezeichnung Java\texttrademark API for WebSocket und regelt die Aufnahme der WebSocket-Technologie in die Standardbibliothek der Java Enterprise Edition (JEE). Er befindet sich aktuell in der 4. Phase und ist seit dem 22. Mai 2013 offizieller Bestandteil seit JEE 7. Die folgenden Beispiele verwenden die achte Version von Java.
 
-\subsubsection{Grundlagen der Java WebSocket-API}
+\subsubsection{Grundlagen}
 Alle Klassen und Interfaces zur Impementierung von WebSocket-Clients und Servern wurden für Java in dem Paket \texttt{javax.websocket} zusammengefasst. Für einen WebSocket-Client, der weder im Browser noch in einem anderen Framework zum Einsatz kommt, kann in Java die Open-Source Referenzimplementierung \textit{Tyrus} von Oracle verwendet werden. Nachfolgende Beispiele verwenden das aktuellste Release 1.12. Die Bereitstellungen erfolgen über Maven: 
 \vspace{-5mm}
 \begin{center}\parbox{0pt}{
@@ -577,7 +578,7 @@ Alle Klassen und Interfaces zur Impementierung von WebSocket-Clients und Servern
 \end{itemize}
 
 \subsubsection*{Ansätze der Programmierung}
-Die Java\texttrademark API for WebSocket kann auf zwei unterschiedliche Weisen verwendet werden. Der programmatische Ansatz sieht die Vererbung der \texttt{Endpoint} Klasse der API vor. Dabei müssen u.a. die Methoden der Oberklasse überschrieben und Funktionen auf Events registriert werden. \autocite[9]{coward_java_2014}:\\
+Die Java\texttrademark API for WebSocket kann auf zwei unterschiedliche Weisen verwendet werden. Der programmatische Ansatz sieht die Vererbung der \texttt{Endpoint} Klasse der API vor. Dabei müssen u.a. die Methoden der Oberklasse überschrieben und Funktionen auf Events registriert werden. \autocite[9]{coward_java_2014}:\smallskip
 
 \begin{lstlisting}[frame=single, language=Java, caption=Java: Programmatischer Ansatz]
 	public class MyWebSocketClient extends Endpoint {
@@ -593,20 +594,17 @@ Die Java\texttrademark API for WebSocket kann auf zwei unterschiedliche Weisen v
 	}
 \end{lstlisting}
 
-\noindent Der Einsatz von Annotationen transformiert einfache Java-Objekte zu WebSocket Endpunkten. Handelt es sich um eine Annotation auf Klassenebene, so können diverse Konfigurationsparameter angegeben werden. Alle Informationen sind somit an einer Stelle gesammelt und auf eine Konfigurationsklasse kann in vielen Fällen verzichtet werden.\\
+\noindent Der Einsatz von Annotationen transformiert einfache Java-Objekte zu WebSocket Endpunkten. Handelt es sich um eine Annotation auf Klassenebene, so können diverse Konfigurationsparameter angegeben werden. Alle Informationen sind somit an einer Stelle gesammelt und auf eine Konfigurationsklasse kann in vielen Fällen verzichtet werden.\smallskip
 
 \begin{lstlisting}[frame=single, language=Java, caption=Java: Annotationen,label=lst:ServerAnnotation]
-	@ServerEndpoint( value = "/endpoint",
-					subprotocols = {"chat"},
-					decoders = {MyDecoder.class},
-					encoders = {MyEncoder.class})
+	@ServerEndpoint( value = "/endpoint", subprotocols = {"chat"})
 	public class MyWebSocketServer { ... }
 \end{lstlisting}
 
-\noindent Die nachfolgenden Code-Beispiele sind immer annotations-basiert, aufgrund besserer Lesbarkeit, verkürzter Schreibweise und der einfachen Verständlichkeit. 
+\noindent Die nachfolgenden Code-Beispiele sind immer annotations-basiert, aufgrund besserer Lesbarkeit, verkürzter Schreibweise und der einfachen Verständlichkeit. \vspace{-3mm}
 
 \subsubsection*{Erzeugung eines WebSockets}
-\noindent Clientseitige Endpunkte werden mit der Annotation \texttt{@ClientEndpoint} versehen. Die Konstruktion eines WebSockets erfolgt hier durch die Erzeugung eines Container-Objekts, welches anschließend zum Verbindungsaufbau verwendet wird.\\
+\noindent Clientseitige Endpunkte werden mit der Annotation \texttt{@ClientEndpoint} versehen. Die Konstruktion eines WebSockets erfolgt hier durch die Erzeugung eines Container-Objekts, welches anschließend zum Verbindungsaufbau verwendet wird.\smallskip
 
 \begin{lstlisting}[frame=single, language=Java, caption=Java Client: Verbindungsaufbau]
 	@ClientEndpoint
@@ -616,12 +614,10 @@ Die Java\texttrademark API for WebSocket kann auf zwei unterschiedliche Weisen v
 			WebSocketContainer wsc = ContainerProvider.getWebSocketContainer();
 			// Verbindung fuer Endpunkt MyClient herstellen
 			wsc.connectToServer(this, hostPath);
-		}
-	}
+		} }
 \end{lstlisting}
 
-\noindent Die Erstellung des Objekts ist nur dann erfolgreich, wenn die WebSocket-Verbindung aufgebaut werden konnte. Ein WebSocket-Server wird mit der Annotation \texttt{@ServerEndpoint} gekennzeichnet. Sowohl bei Server- als auch bei Clientendpunkten können verschiedene Konfigurationsparameter verwendet werden (siehe Listing \ref{lst:ServerAnnotation}). Der Parameter \texttt{value} gibt dabei den relativen Pfad an, unter dem der WebSocket-Endpunkt erreichbar ist. Wird die Anwendung auf einem lokalen WebServer ausgeführt und ihre Bezeichnung lautet \texttt{example}, so ist die Anwendung erreichbar unter \texttt{ws://localhost[:port]/example/endpoint}. Unterstützte Subprotokolle können optional mittels des Parameters \texttt{subprotocols} angegeben werden. Falls die Anwendung eigene Java-Objekte oder komplexere Datentypen übertragen soll, so müssen Encoder- bzw. Decoder-Klassen angegeben werden. \ref{sec:DeEnCoding}
-
+\noindent Die Erstellung des Objekts ist nur dann erfolgreich, wenn die WebSocket-Verbindung aufgebaut werden konnte. Ein WebSocket-Server wird mit der Annotation \texttt{@ServerEndpoint} gekennzeichnet. Sowohl bei Server- als auch bei Clientendpunkten können verschiedene Konfigurationsparameter verwendet werden (siehe Listing \ref{lst:ServerAnnotation}). Der Parameter \texttt{value} gibt dabei den relativen Pfad an, unter dem der WebSocket-Endpunkt erreichbar ist. Wird die Anwendung auf einem lokalen WebServer ausgeführt und ihre Bezeichnung lautet \texttt{example}, so ist die Anwendung erreichbar unter \url{ws://localhost[:port]/example/endpoint}. Unterstützte Subprotokolle können optional mittels des Parameters \texttt{subprotocols} angegeben werden. Falls die Anwendung eigene Java-Objekte oder komplexere Datentypen übertragen soll, so müssen Encoder- bzw. Decoder-Klassen angegeben werden. Diese werden im Abschnitt \ref{subsubsec:DeEnCoding} näher erläutert.
 %\noindent Der Zugriff auf etwaige Erweiterungen oder Subprotokolle erfolgt in Java durch das \texttt{Session} Objekt. \\
 %
 %\begin{lstlisting}[frame=single, language=Java, caption=Java Client: Erweiterungen und Subprotokolle]
@@ -633,10 +629,8 @@ Die Java\texttrademark API for WebSocket kann auf zwei unterschiedliche Weisen v
 %		String subp = session.getNegotiatedSubprotocol();
 %	}
 %\end{lstlisting}
-
 \subsubsection*{Event-Handling}
-\noindent Durch die Verwendung der Annotationen erfolgt in Java keine manuelle Deklaration der Handler. Eine Methode, die ein bestimmtes Event bearbeitet, wird durch Angabe der jeweiligen Annotation zu einem EventHandler transformiert. Die Java\texttrademark{} API for WebSocket sieht dafür die Annotationen \texttt{@OnOpen}, \texttt{@OnError}, \texttt{@OnMessage} und \texttt{@OnClose} vor. Jede auf diese Weise deklarierte Methode ermöglicht die Angabe einiger Parameter. Die aktuell verwendete \texttt{Session} kann dabei immer empfangen werden. \\
-
+\noindent Durch die Verwendung der Annotationen erfolgt in Java keine manuelle Deklaration der Handler. Eine Methode, die ein bestimmtes Event bearbeitet, wird durch Angabe der jeweiligen Annotation zu einem EventHandler transformiert.\\
 \begin{lstlisting}[frame=single, language=Java, caption=Java: EventHandler]
 	@OnOpen
 	public void init(Session session, EndpointConfig config){
@@ -662,15 +656,21 @@ Die Java\texttrademark API for WebSocket kann auf zwei unterschiedliche Weisen v
 	
 \end{lstlisting}
 
-\subsubsection*{Kommunikation}
+\noindent Die Java\texttrademark{} API for WebSocket sieht dafür die Annotationen \texttt{@OnOpen}, \texttt{@OnError}, \texttt{@OnMessage} und \texttt{@OnClose} vor. Jede auf diese Weise deklarierte Methode ermöglicht die Angabe einiger Parameter. Die aktuell verwendete \texttt{Session} kann dabei immer empfangen werden. \\
+
+\subsubsection{Kommunikation}
 Der RFC6455 definiert Ping- und Pong-Frames, durch die beispielsweise geprüft werden kann, ob ein Endpunkt noch erreichbar ist oder um eine inaktive Verbindung aufrechtzuerhalten. Allerdings spezifiert die W3C WebSocket API keine Möglichkeit, diese Art von Control-Frames zu versenden. Die Java API hingegen stellt dafür die Methoden \texttt{sendPing()} und \texttt{sendPong()} zur Verfügung, die ein \texttt{ByteBuffer}-Objekt als Parameter empfangen, über welches Nutzdaten mit bis zu 125 Byte angehängt werden können. Diese Limitierung wird aufgrund der im RFC6455 definierten Größe von Control-Frames durch eine \texttt{IllegalArgumentException} sichergestellt.\\
 
-\begin{lstlisting}[frame=single, language=Java, caption=Java: Ping/Pong Nachrichten]
+\begin{lstlisting}[frame=single, language=Java, caption=Java: Ping/Pong Nachrichten, label=lst:PingPong]
 	public void sendPing(ByteBuffer applicationData) throws IOException, IllegalArgumentException
 
 	public void sendPong(ByteBuffer applicationData) throws IOException, IllegalArgumentException
 
+	@OnMessage
+	public void catchPong(PongMessage pong, Session session){ ... }
 \end{lstlisting}
+
+\noindent Die Antwort auf eine eingehende Ping-Nachricht muss nicht durch den Entwickler erfolgen. Die Implementierungen der Java WebSocket-API stellen sicher, dass eine korrespondierende Pong-Nachricht so bald wie möglich zurückgesendet wird. In Listing \ref{lst:PingPong} ist die Methode \texttt{catchPong} definiert, die als Parameter ein \texttt{PongMessage}-Objekt empfängt. Durch sie ist es möglich, die Antwort einer zuvor gesendeten Ping-Nachricht weiter zu verarbeiten. Beispielsweise können so Messungen der \textit{Round Trip Time} (RTT) durchgeführt werden. Allerdings ist deren Aussagekraft nur bedingt gegeben, da diese bei größeren Nachrichten stark abweichen können \autocite[116]{coward_java_2014}. Das Senden einer Pong-Nachricht ohne vorangegangenen Ping kann genutzt werden, um einen unidirektionalen \textit{Heartbeat} abzubilden. Ein Endpunkt antwortet spezifikationsgemäß nicht auf eine eintreffende Pong-Nachricht, es sei denn, eine entsprechende Methode wurde dafür bereitgestellt. \\
 
 \noindent Das Senden und Empfangen sowohl textueller als auch binärer Daten ist ebenfalls in der Java WebSocket API definiert. Die grundlegendsten Datentypen, die dabei eingesetzt werden können sind \texttt{String}, \texttt{ByteBuffer} und \texttt{byte[]} \autocite[30]{coward_java_2014}. Darüber hinaus ist es möglich, komplexere Datenstrukturen oder eigene Objekte zu versenden. Dies setzt jedoch entsprechende Decoder- und Encoder-Klassen voraus. Liegen Daten zum Zeitpunkt des Versendens noch nicht vollständig vor oder können aufgrund ihrer Größe nicht in einem einzigen Frame übertragen werden, so kann auf Methoden zurückgegriffen werden, die das partielle Übertragen von Nachrichten ermöglichen. Aufgrund der protokolleigenen Fragmentierung können diese Teilnachrichten von den tatsächlich übertragenen Fragmenten abweichen. Wird der letzte Teil einer Nachricht übertragen, so muss das \texttt{isLast} Flag der jeweiligen \texttt{send}-Methode gesetzt werden. Das Versenden erfolgt immer über die \texttt{RemoteEndpoint} Schnittstelle, die man durch ein \texttt{Session} Objekt erhält. \\
 
@@ -694,10 +694,10 @@ Der RFC6455 definiert Ping- und Pong-Frames, durch die beispielsweise geprüft w
 	}
 \end{lstlisting}
 
-\noindent Die bisher vorgestellten Methoden zum Nachrichtenversand blockieren solange, bis der gesamte Payload übertragen wurde. Soll die Applikation hingegen weitere Aufgaben während des Sendens erledigen können, so muss auf die Schnittstelle \texttt{RemoteEndpoint.Async} zurückgegriffen werden. Beispiele für den Einsatz asynchroner Verarbeitung finden sich häufig. So soll beispielsweise eine grafische Oberfläche beim Versand einer sehr großen Nachricht weiterhin reagieren können. Um Nachrichten asynchron zu übertragen, stellt die API zwei Varianten von \texttt{send}-Methoden zur Verfügung. \\
+\noindent Die bisher vorgestellten Methoden zum Nachrichtenversand blockieren solange, bis der gesamte Payload übertragen wurde. Soll die Applikation hingegen weitere Aufgaben während des Sendens erledigen können, so muss auf die Funktionen der Schnittstelle \texttt{RemoteEndpoint.Async} zurückgegriffen werden. Beispiele für den Einsatz asynchroner Verarbeitung finden sich häufig. So soll eine grafische Oberfläche beim Versand einer sehr großen Nachricht weiterhin reagieren können. Um Nachrichten asynchron zu übertragen, stellt die API zwei Varianten zur Verfügung. \\
 
 \begin{lstlisting}[frame=single, language=Java, caption=Java: Future und Handler]
-	// Liefert Future-Objekt nach Verlassen der Methode
+	// Liefert Future-Objekt zurueck
 	public Future<Void> sendText(String text);
 	
 	// Benoetigt SendHandler
@@ -708,9 +708,9 @@ Der RFC6455 definiert Ping- und Pong-Frames, durch die beispielsweise geprüft w
 \noindent Der erste Weg besteht aus dem Senden einer WebSocket-Nachricht \textit{by future} \autocite[119]{coward_java_2014}. Der Sinn und Zweck eines \texttt{Future}-Objekts ist die Nachverfolgung des Versendungsstatus durch den Aufruf der zugehörigen Methoden. So kann mittels \texttt{isDone()} geprüft werden, ob die Nachricht versand wurde. Die Methode \texttt{cancel()} bricht eine ausstehende Übertragung ab. Im Unterschied zur synchronen Nachrichtenübertragung werden etwaige Ausnahmen oder Fehler nicht automatisch zurückgemeldet. Diese können nur durch 
 \texttt{Future.get()} ermittelt werden. Diese Methode blockiert die weitere Ausführung, bis die Nachricht übermittelt wurde oder ein Fehler aufgetreten ist. \\
 
-\noindent Die zweite Möglichkeit Nachrichten asnychron zu übermitteln erfordert die Bereitstellung eines \textit{callback} Objekts. Dabei handelt es sich um eine Implementierung der \texttt{SendHandler}-Schnittstelle, die beim Eintreffen eines Ereignisses ausgelöst wird. \\
+\noindent Die zweite Möglichkeit Nachrichten asnychron zu übermitteln erfordert die Bereitstellung eines \textit{callback} Objekts. Dabei handelt es sich um eine Implementierung der \texttt{SendHandler}-Schnittstelle, die beim Eintreffen eines Ereignisses ausgelöst wird. Man spricht vom Senden einer Nachricht \textit{with handler}.\smallskip
 
-\begin{lstlisting}[frame=single, language=Java, caption=Java: Callback SendHandler]
+\begin{lstlisting}[frame=single, language=Java, caption=Java: Callback Interface SendHandler]
 public class MyHandler implements SendHandler {
 	@Override
 	public void onResult(SendResult arg0) {
@@ -719,10 +719,81 @@ public class MyHandler implements SendHandler {
 }
 \end{lstlisting}
 
+\noindent Beide Varianten der asynchronen Nachrichtenübermittlung können sowohl textuelle, als auch binäre Daten übertragen. Für das Senden komplexer Strukturen oder eigener Objekte wird auch hier ein Encoder benötigt. Ping- bzw. Pong-Nachrichten können nicht asynchron übertragen werden. Die Notwendigkeit asynchroner Übertragung ist in diesem Fall auch nicht gegeben, da diese Control-Frames maximal 125 Byte Nutzdaten enthalten können und dementsprechend selbst bei geringen Bandbreiten unverzüglich übermittelt werden \autocite[120]{coward_java_2014}.
+
+\subsubsection{En- und Decoding}\label{subsubsec:DeEnCoding}
+Die W3C WebSocket-API definiert lediglich textuelle und binäre Datentypen zur Übermittlung von Nutzdaten und entspricht damit den Anforderungen, die im RFC6455 für das WebSocket-Protokoll festgelegt wurden. Die Java WebSocket-API stellt hierfür standardisierte Methoden bereit, die das Senden eines \texttt{String}-Objekts oder binärer Datentypen wie \texttt{ByteBuffer} bzw. \texttt{byte[]} ermöglichen. In vielen Fällen ist es jedoch von Vorteil, komplexere Datentypen oder eigene Objekte übertragen zu können. Dafür wurde die \texttt{send}-Methode der \texttt{RemoteEndpoint}-Schnittstelle überladen, sodass sie einen Parameter vom Typ \texttt{Object} empfängt. Mit Hilfe dieser Methode lassen sich demnach Objekte eines beliebigen Datentyps versenden. Da das WebSocket-Protokoll aber lediglich textuelle oder binäre Daten kennt, müssen alle komplexeren Objekte in eine dieser beiden Formen gebracht werden. Zu diesem Zweck wurden die Schnittstellen \texttt{Encoder} und \texttt{Decoder} im Paket \texttt{javax.websocket} bereitgestellt. Über untergeordnete Schnittstellen kann zwischen der Umwandlung in textuelle oder binäre Daten gewählt werden. \medskip
+
+\begin{lstlisting}[frame=single, language=Java, caption=Java: Encoder Interface]
+	public interface Encoder {
+		// Aufruf bei Verbindungsaufbau
+		void init(EndpointConfig config);
+		// Aufruf bei Verbindungsabbau
+		void destroy();
+		// Sub-Interfaces mit jeweiliger encode-Methode
+		interface Text<T> extends Encoder { String encode(T object) throws EncodeException; }
+		interface Binary<T> extends Encoder { ByteBuffer encode(T object) throws EncodeException; }
+	}
+\end{lstlisting}
+
+\noindent Die textuelle Enkodierung eines Objekts mit der Klassenbezeichnung \texttt{MyObject} erfolgt demnach über eine Klasse, die das \texttt{Encoder.Text<MyObject>} Interface implementiert. Sowohl die Enkodierung, als auch die Dekodierung erfolgen automatisch und müssen nicht vom Entwickler ausgelöst werden. Die Enkodierung von \texttt{MyObject} erfolgt beim Aufruf der \texttt{send}-Methode. \medskip
+
+\begin{lstlisting}[frame=single, language=Java, caption=Java: Decoder Interface]
+	public interface Decoder {
+	
+		// Aufruf bei Verbindungsaufbau
+		void init(EndpointConfig config);
+		
+		// Aufruf bei Verbindungsabbau
+		void destroy();
+		
+		// Sub-Interfaces mit jeweiliger decode- und willDecode-Methode
+		interface Binary<T> extends Decoder {
+			T decode(ByteBuffer bytes) throws DecodeException;
+			boolean willDecode(ByteBuffer bytes);
+		}
+		
+		interface Text<T> extends Decoder {
+			T decode(String s) throws DecodeException;
+			boolean willDecode(String s);
+		}
+	}
+\end{lstlisting}
+
+\noindent Ein Endpunkt, der nur über eine \texttt{@OnMessage}-Methode verfügt, die als Parameter ein Objekt vom Typ \texttt{MyObject} empfängt, muss beim Erhalt einer textuellen Nachricht diese dekodieren. Dies erfolgt über eine Klasse, die das \texttt{Decoder.Text<MyObject>}-Interface implementiert hat. Dazu ist es zunächst notwendig, zu überprüfen ob die Dekodierung möglich ist. Dies wird über die Methode \texttt{willDecode} sichergestellt. Anschließend wird das erwartete Objekt aus dem empfangenen Text dekodiert.\medskip
+
+\noindent Damit ein WebSocket-Endpunkt Nachrichten enkodieren oder dekodieren kann, müssen diese Klassen bekannt gemacht werden. Dies erfolgt durch deren Angabe als Parameter in der jeweiligen Klassenannotation. Sollen verschiedene Objekte versendet oder empfangen werden, so müssen entsprechende Encoder- und Decoderklassen bereitgestellt werden. Die Auswahl der passenden Klasse erfolgt anhand ihrer Reihenfolge in der Klassenannotation.\medskip
+
+\begin{lstlisting}[frame=single, language=Java, caption=Java: Angabe der Encoder- und Decoder-Klassen]
+	@ClientEndpoint(encoders = { MyObjectEncoder.class }, 
+								decoders = { MyObjectDecoder.class })
+	public class MyWebSocketClient { ... }
+\end{lstlisting}
+
+\noindent Jede WebSocket-Verbindung erhält eine eigene Instanz der Encoder- und Decoder-Klassen. Dadurch wird sichergestellt, dass niemals mehr als ein Thread in der \texttt{decode()} oder \texttt{encode()} Methode aktiv ist \autocite[82]{coward_java_2014}. 
+
+\subsubsection{Konfiguration und \texttt{Session}}
+Eine der zentralen Komponenten der Java WebSocket-API ist die \texttt{EndpointConfig} Schnittstelle. Durch sie können einem Endpunkt diverse Meta-Daten übermittelt werden, die den gemeinsamen Zustand aller verbundenen Endpunkte repräsentieren. Je nach Art des Endpunktes wird weiterhin zwischen \texttt{ClientEndpointConfig} und \texttt{ServerEndpointConfig} unterschieden. Die Parameter sind bei der Verwendung von Annotationen in der jeweiligen Klassenannotation anzugeben. Sie werden zum Zeitpunkt der Bereitstellung dazu verwendet, um eine entsprechende Instanz der zugehörigen Endpunktkonfiguration zu erstellen. Diese Konfiguration kann als optionaler Parameter von den Event-Handlern empfangen werden.\\
+
+\noindent Die Methoden der übergeordneten \texttt{EndpointConfig} Schnittstelle sind sowohl für Server-, als auch für Clientendpunkte verfügbar. Durch sie können die konfigurierten Encoder- und Decoder-Klassen sowie ein \texttt{Map} Objekt abgerufen werden. Die \texttt{Map} kann vom Entwickler genutzt werden, um applikationsspezifische Objekte und Informationen abzulegen. \medskip
+
+\begin{lstlisting}[frame=single, language=Java, caption=Java: EndpointConfig]
+	public interface EndpointConfig{
+		// Liste aller Encoder-Klassen
+		List<Class<? extends Encoder>> getEncoders()
+		// Liste aller Decoder-Klassen
+		List<Class<? extends Decoder>> getDecoders()
+		// Editierbare Map
+		Map<String,Object> getUserProperties()
+	}
+\end{lstlisting}
+
+\paragraph{Subprotokolle und Erweiterungen}
+Die Spezifikation des WebSocket-Protokolls ermöglicht es, Subprotokolle und Erweiterungen bereitzustellen. Die verwendeten HTTP-Felder im Opening-Handshake lauten \texttt{Sec-WebSocket-Protocol} und \texttt{Sec-WebSocket-Extensions}. Subprotokolle werden dabei als einfache \texttt{String} Namen angegeben und durch Kommata getrennt. Bei der Vergabe eines eigenen Namens für ein Subprotokoll sollte beachtet werden, dass es nicht zu einer Überschneidung mit den bei der IANA registrierten Bezeichnungen kommt. Werden WebSocket-Frames um zusätzliche Informationen erweitert, um beispielsweise den Inhalt der Nutzdaten näher zu beschreiben, so spricht man von \texttt{Extensions} \autocite[102]{coward_java_2014}. Verwendet eine Applikation Subprotokolle oder Erweiterungen, so werden diese ebenfalls über die Klassenannotation hinterlegt.\\
+
 \noindent 
-
-% Es fehlen noch die Konfigklassen, EnDeCoding, Path Mapping
-
+% Es fehlen noch  Path Mapping
+\newpage
 \section{Fachliche Anforderungen}
 \subsection{Analyse des DaKo-Frameworks}
 \subsection{Anforderungen an WebSocket-Chat}
