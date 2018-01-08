@@ -25,6 +25,7 @@
 \usepackage{color}
 \usepackage{listings}
 \usepackage{hyperref}
+\usepackage[framemethod=tikz]{mdframed}
 
 \definecolor{lightgray}{rgb}{.9,.9,.9}
 \definecolor{darkgray}{rgb}{.4,.4,.4}
@@ -787,12 +788,92 @@ Eine der zentralen Komponenten der Java WebSocket-API ist die \texttt{EndpointCo
 		Map<String,Object> getUserProperties()
 	}
 \end{lstlisting}
+\noindent Die Konfigurationsschnittstelle des Clients ermöglicht den Zugriff auf clientspezifische Eigenschaften wie die bevorzugten Subprotokolle, Erweiterungen und den Konfigurator. Der Konfigurator ist eine Klasse, die Modifikationen an der HTTP-Anfrage sowie eine manuelle Auswertung der zugehörigen Antwort des Servers ermöglicht.
 
+\begin{mdframed}[hidealllines=true,backgroundcolor=lightgray!20]
 \paragraph{Subprotokolle und Erweiterungen}
-Die Spezifikation des WebSocket-Protokolls ermöglicht es, Subprotokolle und Erweiterungen bereitzustellen. Die verwendeten HTTP-Felder im Opening-Handshake lauten \texttt{Sec-WebSocket-Protocol} und \texttt{Sec-WebSocket-Extensions}. Subprotokolle werden dabei als einfache \texttt{String} Namen angegeben und durch Kommata getrennt. Bei der Vergabe eines eigenen Namens für ein Subprotokoll sollte beachtet werden, dass es nicht zu einer Überschneidung mit den bei der IANA registrierten Bezeichnungen kommt. Werden WebSocket-Frames um zusätzliche Informationen erweitert, um beispielsweise den Inhalt der Nutzdaten näher zu beschreiben, so spricht man von \texttt{Extensions} \autocite[102]{coward_java_2014}. Verwendet eine Applikation Subprotokolle oder Erweiterungen, so werden diese ebenfalls über die Klassenannotation hinterlegt.\\
+Die Spezifikation des WebSocket-Protokolls ermöglicht die Bereitstellung von Subprotokollen und Erweiterungen. Die verwendeten HTTP-Felder im Opening-Handshake lauten \texttt{Sec-WebSocket-Protocol} und \texttt{Sec-WebSocket-Extensions}. Subprotokolle werden dabei als einfache \texttt{Strings} angegeben und durch Kommata getrennt. Bei der Vergabe eines eigenen Namens für ein Subprotokoll sollte beachtet werden, dass es nicht zu einer Überschneidung mit den bei der IANA registrierten Bezeichnungen kommt. Werden WebSocket-Frames um zusätzliche Informationen erweitert, um beispielsweise den Inhalt der Nutzdaten näher zu beschreiben, so spricht man von \texttt{Extensions} \autocite[102]{coward_java_2014}. Verwendet eine Applikation Subprotokolle oder Erweiterungen, so werden diese ebenfalls in der Klassenannotation hinterlegt.\\
+\end{mdframed}
+\noindent Für das Hinzufügen oder Ändern der HTTP-Header muss die verwendete Konfiguratorklasse von der Klasse \texttt{ClientEndpointConfig.Configurator} abgeleitet werden. Ein häufiger Anwendungsfall ist die Erweiterung der HTTP-Anfrage um applikations- oder frameworkspezifische Informationen für zusätzliche Funktionen \autocite[104]{coward_java_2014}. In Listing \ref{lst:cConf} ist ein solcher Fall beispielhaft dargestellt.\medskip
 
-\noindent 
-% Es fehlen noch  Path Mapping
+\begin{lstlisting}[frame=single, language=Java, caption=Java: ClientEndpointConfig Konfigurationsklasse, label=lst:cConf]
+	public class MyClientConfig extends ClientEndpointConfig.Configurator {
+
+		@Override
+		public void afterResponse(HandshakeResponse hr) {
+			// Pruefen, ob Feature aktiviert werden konnte
+			boolean activated = hr.getHeaders().get("My-Feature-Field").get(0)
+												.equals("activated");
+			
+			if(activated){
+				// MyFeature nutzen
+			} else {
+				// Auf Fallback-Mechanismus zurueckgreifen
+			}
+			super.afterResponse(hr);
+		}
+
+		@Override
+		public void beforeRequest(Map<String, List<String>> headers) {
+			// HTTP-Headerfeld fuer "MyFeature" erzeugen
+			List<String> featureParam = new ArrayList<String>();
+			featureParam.add("enable");
+			
+			// HTTP-Header erweitern
+			headers.put("My-Feature-Field", featureParam);
+			
+			super.beforeRequest(headers);
+		}
+	}
+\end{lstlisting}
+
+\noindent Die Konfiguration des Server durch die \texttt{ServerEndpointConfig} Schnittstelle bietet ebenfalls den Zugriff auf einen Konfigurator. Zudem ist es möglich die unterstützten Subprotokolle und Erweiterungen des Servers sowie die Klasse des Endpunkts abzurufen. Die Ermittlung des relativen Pfads des Serverendpunkts wird in Abschnitt \ref{subsubsec:apiPathMapping} detailliert behandelt. \\
+
+\noindent Der Konfigurator der \texttt{ServerEndpointConfig} stellt zusätzlich diverse Methoden bereit, über die der Verbindungsaufbau gezielt gesteuert werden kann. So kann ein passendes Subprotokoll oder eine Erweiterung gewählt, die Erzeugung einer neuen Instanz manuell durchgeführt und in den Handshake selbst eingegriffen werden. Die Methode \texttt{checkOrigin()} prüft, ob der für Browserclients verbindliche HTTP-Origin-Header auf den selben Webserver verweist, auf dem der Serverendpunkt ausgeführt wird \autocite[107]{coward_java_2014}. Eine Anpassung ist meist nicht notwendig. Listing \ref{lst:sConf} zeigt den Konfigurator des Serverendpunkts, welcher den modifizierten Opening-Handshake des Clients aus Listing \ref{lst:cConf} bearbeitet. Dazu wird in der Methode \texttt{modifyHandshake()} die Anfrage des Clients auf das entsprechende Feld geprüft und die Antwort des Servers vor dem Versenden angepasst. \medskip
+
+\begin{lstlisting}[frame=single, language=Java, caption=Java: ServerEndpointConfig Konfigurationsklasse, label=lst:sConf]
+	public class MyServerConfig extends ServerEndpointConfig.Configurator {
+		@Override
+		public boolean checkOrigin(String originHeaderValue) {
+			// Hier kann die Pruefung des Origin-Headers durchgefuehrt werden
+		}
+		
+		@Override
+		public <T> T getEndpointInstance(Class<T> endpointClass) throws InstantiationException {
+			// Hier kann die Erzeugung einer neuen Instanz angepasst werden
+		}
+		
+		@Override
+		public List<Extension> getNegotiatedExtensions(List<Extension> installed, List<Extension> requested) {
+			// Hier kann der Standardablauf der Wahl der Erweiterung veraendert werden
+		}
+		
+		@Override
+		public String getNegotiatedSubprotocol(List<String> supported, List<String> requested) {
+			// Hier kann der Standardablauf der Protokollwahl veraendert werden
+		}
+		
+		@Override
+		public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response) {
+			// Anfrage auf zusaetzliches Header-Feld pruefen
+			boolean activateMyFeature = request.getHeaders().get("My-Feature-Field").get(0).equals("enable");
+		
+			if(activateMyFeature) {
+				// HTTP-Headerfeld fuer "MyFeature" erzeugen
+				List<String> featureParam = new ArrayList<String>();
+				featureParam.add("activated");
+				
+				// HTTP-Antwort-Header erweitern
+				response.getHeaders().put("My-Feature-Field", featureParam);
+			}
+		}
+	}
+\end{lstlisting}
+
+
+\subsubsection{Path-Mapping}\label{subsubsec:apiPathMapping}
+
+% Es fehlt noch  Path Mapping
 \newpage
 \section{Fachliche Anforderungen}
 \subsection{Analyse des DaKo-Frameworks}
