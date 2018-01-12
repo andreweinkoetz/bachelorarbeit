@@ -24,8 +24,9 @@
 \usepackage{colortbl}
 \usepackage{color}
 \usepackage{listings}
-\usepackage{hyperref}
+\usepackage[hidelinks]{hyperref}
 \usepackage[framemethod=tikz]{mdframed}
+\usepackage{chngcntr}
 
 \definecolor{lightgray}{rgb}{.9,.9,.9}
 \definecolor{darkgray}{rgb}{.4,.4,.4}
@@ -91,7 +92,7 @@
 \newtheorem{Lemma}[Satz]{Lemma}	
                   
 \numberwithin{equation}{section} 
-
+\counterwithin{figure}{section}
 % einige Abkuerzungen
 \newcommand{\C}{\mathbb{C}} % komplexe
 \newcommand{\K}{\mathbb{K}} % komplexe
@@ -108,7 +109,8 @@
 \begin{document}
   % Keine Seitenzahlen im Vorspann
   \pagestyle{empty}
-  \renewcommand{\thelstlisting}{\arabic{section}-\arabic{lstlisting}}
+  \renewcommand{\thelstlisting}{\arabic{section}.\arabic{lstlisting}}
+ 
   % Titelblatt der Arbeit
 \begin{titlepage}
 
@@ -171,7 +173,16 @@ Die Anforderungen an Webanwendungen haben sich in den vergangenen Jahren stark v
 
 \newpage
 \section{Das WebSocket Protokoll}\label{sec:WebSocketProtokoll}
-Die Arbeit an der Spezifikation des WebSocket Protokolls begann bereits 2009, als es von Google in Zusammenarbeit mit Apple, Microsoft und Mozilla im Rahmen ihrer Kooperation WHATWG\footnote{Web Hypertext Application Technology Working Group unter: www.whatwg.org} der Internet Engineering Task Force (IETF) vorgeschlagen wurde. Bis Mai 2010 wurden noch zahlreiche Verbesserungen hinzugefügt, bis es schließlich in Version 76 \autocite{hickson_websocket_2010} im August 2010 an die BiDirectional or Server-Initiated HTTP (HyBi) Task Force der IETF zur Weiterentwicklung übergeben wurde \autocite{fette_websocket_2010}. Neben vielen anderen Fortschritten wurde das Protkoll um die Möglichkeit erweitert binäre Dateien auszutauschen, sowie Sicherheitslücken geschlossen, die in Verbindung mit Proxy-Servern entstehen konnten. Im Dezember 2010 wurde das WebSocket Protokoll von der IETF zu dem Request for Comment (RFC) 6455 erklärt \autocite{fette_websocket_2011}. Dieser definiert auf über 70 Seiten neben den Kommunikationsphasen und verschiedenen Frames der WebSockets noch zahlreiche weitere technische Details und Defintionen. In diesem Kapitel sollen die wichtigsten Grundlagen der Protokollspezifikation dargelegt werden.
+Die Arbeit an der Spezifikation des WebSocket-Protokolls begann bereits 2009, als es von Google in Zusammenarbeit mit Apple, Microsoft und Mozilla im Rahmen ihrer Kooperation WHATWG\footnote{Web Hypertext Application Technology Working Group unter: www.whatwg.org} der Internet Engineering Task Force (IETF) vorgeschlagen wurde. Bis Mai 2010 wurden noch zahlreiche Verbesserungen hinzugefügt, bis es schließlich in Version 76 \autocite{hickson_websocket_2010} im August 2010 an die \textit{BiDirectional or Server-Initiated HTTP} (HyBi) Task Force der IETF zur Weiterentwicklung übergeben wurde \autocite{fette_websocket_2010}. Neben vielen anderen Fortschritten wurde das Protkoll um die Möglichkeit erweitert binäre Dateien auszutauschen, sowie Sicherheitslücken geschlossen, die in Verbindung mit Proxy-Servern entstehen konnten. Im Dezember 2010 wurde das WebSocket-Protokoll von der IETF zu dem Request for Comment (RFC) 6455 erklärt \autocite{fette_websocket_2011}. Dieser definiert auf über 70 Seiten neben den Kommunikationsphasen und verschiedenen Frames der WebSockets noch zahlreiche weitere technische Details und Defintionen. In diesem Kapitel sollen die wichtigsten Grundlagen der Protokollspezifikation dargelegt werden.\\
+\begin{figure}[ht] \label{fig:wsOSI}
+\begin{center}
+	\includegraphics[scale=1]{img/osi.pdf}
+	\caption{WebSocket-Protokoll im ISO/OSI-Modell}
+\end{center}
+\end{figure}
+
+\noindent Die Aufgabe des WebSocket-Protokolls ist die bidirektionale Kommunikation zwischen einer (Web-)Anwendung und einem WebSocket-Server. Dabei folgt das Protokoll dem Prinzip des minimalen \textit{Framings} \autocite[9-10]{fette_websocket_2011}. Das bedeutet, dass Zusatzinformation zur Übermittlung von Nachrichten, wie z.B. Protokoll-Header, möglichst gering zu halten sind. Das Konzept sieht vor, dass das WebSocket-Protokoll direkt als Schicht auf das \textit{Transmission Control Protocol} (TCP) aufsetzt und es neben HTTP in einer bereits bestehenden Infrastruktur eingesetzt werden kann. Dabei wird das Sicherheitsmodell der Same-Origin-Policy aus RFC 6454 sowie ein Adressierungs- und Bezeichnungsmechanismus hinzugefügt, durch welchen die Unterstützung mehrerer Dienste auf einem Port und verschiedener Hostnamen unter einer IP-Adresse sichergestellt wird. Des weiteren soll das aufgesetzte Framing den Paketierungsmechanismus des \textit{Internet Protocols} (IP) imitieren, ohne die Länge eines Frames zu beschränken. Zudem wird ein zusätzlicher \textit{Closing-Handshake} definiert, der auch bei der Verwendung von Proxy-Servern und anderen \textit{Vermittlern}, wie z.B. Firewalls, zwischen den beiden Endpunkten durchgeführt werden kann. Obwohl das WebSocket-Protokoll die für HTTP(S) vorgesehenen Ports 80 und 443 verwendet, verbindet die beiden Protokolle lediglich der \textit{HTTP Upgrade}-Mechanismus. Dieser kommt zum Einsatz, wenn eine WebSocket-Verbindungsanfrage von einem HTTP-Server interpretiert wird.
+
 \subsection{WebSocket-Frames}\label{subsec:wsFrames}
 Die Spezifikation eines WebSocket-Frames sieht eine Zweiteilung vor, wie sie bei Protokollnachrichten üblicherweise vorgenommen wird. Ein WebSocket-Frame besteht demnach aus einem Header Bereich der Kontrolldaten enthält, sowie dem Payload, welcher die Nutzdaten beinhaltet.\vspace{2mm}
 \begin{figure}[ht] \label{fig:wsFrame}
@@ -186,7 +197,7 @@ Anhand des Aufbaus ist leicht erkennbar, dass die Kommunikation über WebSockets
 Im nachfolgenden Abschnitt werden die Felder sowie deren jeweilige Aufgabe detailliert erläutert:
 
 \begin{description}
-	\item[FIN (1 Bit)] Das FIN-Flag gibt an, ob es sich bei dem empfangenen Frame um ein Fragment handelt. Kann der Payload nicht auf einmal übertragen werden, so wird die Übertragung über mehrere Frames gesteuert. Das FIN-Flag aller unvollständigen Fragmente weist den Wert 0 auf, wohingegen das finale Fragment mit einer 1 gekennzeichnet ist. Wenn alle Nutzdaten mit einem einzigen Frame übertragen werden können, so trägt dessen FIN-Flag ebenfalls den Wert 1.
+	\item[FIN (1 Bit)] Das FIN-Flag gibt an, ob es sich bei dem empfangenen Frame um ein Fragment handelt. Kann der Payload nicht auf einmal übertragen werden, so wird die Übertragung über mehrere Frames gesteuert. Das FIN-Flag aller unvollständigen Fragmente weist den Wert 0 auf, wohingegen das finale Fragment mit einer 1 gekennzeichnet ist. Wenn alle Nutzdaten mit einem einzigen Frame übertragen werden können, so trägt dessen FIN-Flag ebenfalls den Wert 1. Eine Fragmentierung ist in den meisten Fällen nicht erforderlich. Liegen Daten jedoch zum Zeitpunkt des Versendens nicht vollständig vor oder können nicht zwischengespeichert werden, so ermöglicht die Fragmentierung der Nachrichten eine teilweise Übertragung. 
 	\item[RSV1, RSV2, RSV3 (jeweils 1 Bit)] Diese Flags sind für zukünftige Implementierung reserviert und finden aktuell keine standardisierte Anwendung. Die Ausnahme stellt das RSV1-Bit dar, welches verwendet wird um anzuzeigen, ob eine Nachricht komprimiert wurde oder nicht \autocite{internet_assigned_numbers_authority_websocket_2011}. Daher tragen sie meist den Wert 0. Ist eines dieser Flags gesetzt und die empfangende Stelle hat keine Erweiterung, welches das jeweilige Flag interpretieren kann, so muss die WebSocket-Verbindung geschlossen werden \autocite[27]{fette_websocket_2011}. 
 	\item[opcode (4 Bit)] Das opcode-Feld enthält die Angabe wie der Payload zu interpretieren ist. Neben den sogenannten Datenframes bzw. Non-Control-Frames, welche die Art der übertragenen Daten kennzeichnen, sind Control-Frames definiert, die zur Steuerung und Überprüfung der Verbindung verwendet werden. Wird ein unbekannter Opcode empfangen, so wird die WebSocket-Verbindung geschlossen.
 	\begin{itemize}
@@ -199,7 +210,7 @@ Im nachfolgenden Abschnitt werden die Felder sowie deren jeweilige Aufgabe detai
 		\item \textbf{0xA} definiert ein Pong-Frame
 		\item \textbf{0xB-F} reserviert für weitere Control-Frames
 	\end{itemize}
-	\item[MASK (1 Bit)] Ist das MASK-Flag gesetzt, so ist der Payload maskiert. Frames, die clientseitig initiert wurden, müssen maskiert sein, wohingegen serverseitige Frames keine Maskierung vornehmen dürfen. Der verwendete Masking-Key muss im gleichnamigen Header-Feld hinterlegt werden.
+	\item[MASK (1 Bit)] Aus Sicherheitsgründen müssen alle Frames \textit{maskiert} werden, die von einem Client zu einem Server übertragen werden. Unter Maskierung versteht man dabei die bitweise Abwandlung der Nutzdaten mittels eines Schlüssels (Masking Key), wobei die Länge der Nutzdaten unverändert bleibt. Das MASK-Flag zeigt dabei an, ob der  Payload maskiert ist. Frames, die clientseitig initiert wurden, müssen maskiert sein, wohingegen serverseitige Frames keine Maskierung vornehmen dürfen. Der verwendete Masking-Key muss im gleichnamigen Header-Feld hinterlegt werden.
 	\item[payload length (7 Bit)] Hier wird die Länge der Nutzdaten angegeben. Sind diese nicht größer als 125 Bytes, so können sie mit nur einem Frame übertragen werden. Nutzdaten mit einem höheren Speicherplatzbedarf werden je nach Größe mit dem Wert 126 bzw. 127 angegeben. Diese Angaben führen zur Verwendung des Header-Felds \textit{Extended payload length}.
 	\item[Extended payload length (16 Bit oder 64 Bit)] Überschreitet die Länge des Payloads 125 Byte, so wird dieses Feld verwendet. Je nach Wert im Header-Feld \textit{payload length} umfasst die \textit{Extended payload length} zwei Byte oder acht Byte. Dementsprechend beträgt die maximale Länge der Nutzdaten in einem WebSocket-Frame $2^{64} - 1$ Byte \autocite[41]{gorski_websockets_2015}
 	\item[Masking Key (0 oder 32 Bit)] Ein Frame, der von einem Client an einen Server gesendet wird, muss mit einem 32-Bit Schlüssel maskiert werden. Dieser wird vom Client generiert und im gleichnamigen Header-Feld abgelegt. Nachrichten, die von einem Server an einen Client gesendet werden, enthalten dieses Feld nicht.
@@ -223,7 +234,7 @@ In Abschnitt 5.4. des RFC6455 ist die Fragmentierung von WebSocket-Frames beschr
 
 \noindent Daraus folgt, dass die Verarbeitung sowohl fragmentierter als auch unfragmentierter Nachrichten von allen Endpunkten unterstützt werden muss. Da Control-Frames nicht fragmentiert werden dürfen, können Fragmente lediglich von den Typen Text, Binary oder einem der reservierten opcodes (0x3-7) sein. Die Angabe des Typs erfolgt durch den opcode des ersten Fragments. Alle weiteren Fragmente tragen den opcode 0x0, der dem Empfänger mitteilt, dass die empfangenen Nutzdaten an den Payload des vorangegangen Frames angehängt werden sollen \autocite{shepherd_writing_2017}.
 \subsubsection*{Maskierung}\label{subsubsec:wsMasking}
-WebSocket Frames, von einem Client zu einem Server gesendet, müssen maskiert werden. Dieser Mechanismus war im ursprünglichen Draft für das WebSocket Protokoll nicht vorgesehen. In Folge einer Untersuchung durch eine Gruppe von Forschern rund um ein Team der Carnegie Mellon Universität wurden Sicherheitslücken in dem Konzept aufgedeckt. Bei der Verwendung  transparenter Proxy-Server konnten sie durch deren fehlerhafte Implementierung des, bei dem Aufbau einer WebSocket Verbindung genutzten, \textit{Upgrade} Mechanismus den Cache des Proxies infizieren \autocite{huang_talking_2011}. Daraufhin wurde der Draft überarbeitet und um die Maskierung über eine bitweise XOR Verknüpfung ergänzt. \\
+WebSocket Frames, von einem Client zu einem Server gesendet, müssen maskiert werden. Dieser Mechanismus war im ursprünglichen Draft für das WebSocket Protokoll nicht vorgesehen. In Folge einer Untersuchung durch eine Gruppe von Forschern rund um ein Team der Carnegie Mellon Universität wurden Sicherheitslücken in dem Konzept aufgedeckt. Bei der Verwendung transparenter Proxy-Server konnten sie durch deren fehlerhafte Implementierung des, bei dem Aufbau einer WebSocket Verbindung genutzten, \textit{Upgrade} Mechanismus den Cache des Proxies infizieren \autocite{huang_talking_2011}. Daraufhin wurde der Draft überarbeitet und um die Maskierung über eine bitweise XOR Verknüpfung ergänzt. \\
 
 \noindent Da der zur Maskierung des Payloads verwendete Schlüssel im Frame enthalten ist, steht hier nicht die Vertraulichkeit der gesendeten Daten im Vordergrund. Vielmehr sollen Proxy-Server daran gehindert werden, den Inhalt des Payloads zu lesen. Somit wird verhindert, dass Angreifer den Payload manipulieren und diesen für einen Angriff gegen einen Proxy einsetzen können \autocite{gorski_websockets_2015}.  Im Folgenden soll der Ablauf der Maskierung einer Textnachricht an einem Beispiel verdeutlicht werden:\\
 
@@ -321,7 +332,7 @@ Der Abbau einer WebSocket-Verbindung erfolgt durch den Versand eines Close-Frame
 \begin{description}
 	\item[0-999] Dieser Bereich wird nicht genutzt.
 	\item[1000-2999] Diese Status-Codes sind für die Definition innerhalb des RFC6455 sowie für zukünftige Überarbeitungen und Erweiterungen reserviert.
-	\item[3000-3999] Status-Codes in diesem Bereich sind für Verwendung in Frameworks, Bibliotheken und Anwendungen gedacht und bedürfen einer Registrierung bei der Internet Assigned Numbers Authority (IANA).
+	\item[3000-3999] Status-Codes in diesem Bereich sind für die Verwendung in Frameworks, Bibliotheken und Anwendungen gedacht und bedürfen einer Registrierung bei der Internet Assigned Numbers Authority (IANA).
 	\item[4000-4999] In diesem Bereich können eigene Status-Codes definiert werden. Diese benötigen keine Registrierung und müssen den kommunizierenden Anwendungen bekannt sein. 
 \end{description}
 
@@ -331,7 +342,7 @@ Der Abbau einer WebSocket-Verbindung erfolgt durch den Versand eines Close-Frame
 	\begin{center}
 		\begin{tabular}{|>{\centering\arraybackslash}p{1.2cm}|l|>{\arraybackslash}p{8.0cm}|l|}
 			\hline
-			Status-Code & Bedeutung &  Beschreibung & Spezifiert durch \\ \hline
+			Status-Code & Bedeutung &  Beschreibung & Spezifiziert durch \\ \hline
 			1000 & Normal Closure & Zeigt einen ordnungsgemäßen Verbindungsabbau an. & RFC6455  \\ \hline
 			1002 & Protocol Error &  Der Endpunkt beendet die Verbindung aufgrund eines Protokollfehlers. Beispielsweise wird der Empfang einer nicht maskierten Nachricht von einem Server durch selbigen mit diesem Status-Code beendet. & RFC6455 \\ \hline
 			1006 & Abnormal Closure &  Dieser Status darf nicht in einem Close-Frame verwendet werden. Anwendungen können durch diesen signalisieren, dass die Verbindung unerwartet und auf unbekannte Weise beendet wurde.  & RFC6455 \\ \hline
@@ -344,7 +355,7 @@ Der Abbau einer WebSocket-Verbindung erfolgt durch den Versand eines Close-Frame
 \end{table*}
 
 \subsection{WebSocket Kommunikationsphasen}\label{subsec:wsLifecycle}
-Das WebSocket-Protokoll basiert auf dem Transport Control Protocol (kurz: TCP) und durchläuft wie dieses verschiedene Phasen der Kommunikation. Zu Beginn wird ähnlich zu TCP ein Opening-Handshake zum Verbindungsaufbau durchgeführt. Auch am Ende der Datenübertragung wird ein solcher Handshake eingesetzt, um die Verbindung ordnungsgemäßg zu beenden. Die Ports, welche vom WebSocket-Protokoll verwendet werden, sind Port 80 (ungesicherte Verbindungen) und Port 443 (gesicherte Verbindungen). Aktuell wird deren Verwendung jedoch vom HTTP(S)-Protokoll dominiert und sie müssen daher geteilt werden. Der Verbindungsaufbau wird daher als HTTP-Upgrade Anfrage initiiert. Zukünftige Implementierungen könnten dies jedoch durch einen einfacheren Mechanismus über einen dedizierten Port ablösen, ohne das WebSocket-Protokoll umgestalten zu müssen \autocite[3]{fette_websocket_2011}. Im Folgenden Abschnitt werden die notwendigen Schritte zum Verbindungsaufbau und -abbau erläutert, sowie ein beispielhafter Ablauf der Übertragung über eine WebSocket-Verbindung gezeigt.
+Das WebSocket-Protokoll basiert auf dem Transmission Control Protocol und durchläuft wie dieses verschiedene Phasen der Kommunikation. Zu Beginn wird ähnlich zu TCP ein Opening-Handshake zum Verbindungsaufbau durchgeführt. Auch am Ende der Datenübertragung wird ein solcher Handshake eingesetzt, um die Verbindung ordnungsgemäßg zu beenden. Die Ports, welche vom WebSocket-Protokoll verwendet werden, sind Port 80 (ungesicherte Verbindungen) und Port 443 (gesicherte Verbindungen). Aktuell wird deren Verwendung jedoch vom HTTP(S)-Protokoll dominiert und sie müssen daher geteilt werden. Der Verbindungsaufbau wird daher als HTTP-Upgrade Anfrage initiiert. Zukünftige Implementierungen könnten dies jedoch durch einen einfacheren Mechanismus über einen dedizierten Port ablösen, ohne das WebSocket-Protokoll umgestalten zu müssen \autocite[3]{fette_websocket_2011}. Im Folgenden Abschnitt werden die notwendigen Schritte zum Verbindungsaufbau und -abbau erläutert, sowie ein beispielhafter Ablauf der Übertragung über eine WebSocket-Verbindung gezeigt.
 
 \subsubsection{Verbindungsaufbau}\label{subsubsec:wsOpen}
 Da Verbindungen über die Ports 80 bzw. 443 in den meisten Firewalls zugelassen werden, bedarf es keiner neuen Freigaben bei der Verwendung von WebSockets. Allerdings sind diese Ports oftmals durch einen HTTP-Server belegt. Aus diesem Grund bedarf es beim Aufbau einer WebSocket-Verbindung der Kooperation mit HTTP. Der Client sendet dazu einen HTTP-Upgrade-Request, der um spezielle Felder erweitert wurde.
@@ -367,7 +378,7 @@ Da Verbindungen über die Ports 80 bzw. 443 in den meisten Firewalls zugelassen 
 	\label{fig:wsOpenHandshakeClient}
 \end{figure*}
 
-\noindent Der Client stellt in Abbildung \ref{fig:wsOpenHandshakeClient} einen solchen HTTP-Upgrade-Request an den Endpunkt des WebSocket-Servers unter \texttt{localhost:8080}. Durch \texttt{Connection: Upgrade} wird dem Server mitgeteilt, dass auf ein anderes Protokoll gewechselt werden soll, in diesem Fall \texttt{websocket}. Die Versionsnummer entspricht den unterschiedlichen IETF Drafts. Über \texttt{Sec-WebSocket-Extensions} werden die Erweiterungen angefragt, die der Client unterstützt. Die übermittelte Erweiterung \texttt{permessage-deflate} wird in Kombination mit dem Parameter \texttt{client\_max\_window\_bits} angegeben, der die Sliding Window Größe limitiert, mit der der Client die Nachricht komprimiert. So kann der zu reservierende Speicherbedarf bei der serverseitigen Dekompression reduziert werden \autocite[18]{yoshino_compression_2015}. Der Client generiert den Base64-codierten \texttt{Sec-WebSocket-Key}, der anschließend vom Server zur Empfangsbestätigung des Handshakes verwendet wird. 
+\noindent Der Client stellt in Abbildung \ref{fig:wsOpenHandshakeClient} einen solchen HTTP-Upgrade-Request an den Endpunkt des WebSocket-Servers unter \texttt{localhost:8080}. Durch \texttt{Connection: Upgrade} wird dem Server mitgeteilt, dass auf ein anderes Protokoll gewechselt werden soll, in diesem Fall \texttt{websocket}. Die Versionsnummer entspricht den unterschiedlichen IETF Drafts. Über \texttt{Sec-WebSocket-Extensions} werden die Erweiterungen angefragt, die der Client unterstützt. Die übermittelte Erweiterung \texttt{permessage-deflate} wird in Kombination mit dem Parameter \texttt{client\_max\_window\_bits} angegeben, der die \textit{LZ77 Sliding Window} Größe limitiert, mit der der Client die Nachricht komprimiert. Bei dieser Methode handelt es sich um einen Algorithmus zur verlustfreien Kompression von Daten. So kann der zu reservierende Speicherbedarf bei der serverseitigen Dekompression reduziert werden \autocite[18]{yoshino_compression_2015}. Der Client generiert den Base64-codierten \texttt{Sec-WebSocket-Key}, der anschließend vom Server zur Empfangsbestätigung des Handshakes verwendet wird. 
 
 \begin{figure*}[ht]
 	\begin{center}
@@ -384,7 +395,7 @@ Da Verbindungen über die Ports 80 bzw. 443 in den meisten Firewalls zugelassen 
 	\label{fig:wsOpenHandshakeServer}
 \end{figure*}
 
-\noindent Damit der Server bestätigen kann, dass der Handshake eingetroffen ist, wird der  übermittelte \texttt{Sec-WebSocket-Key} mit dem Globally Unique Identifier (GUID) \texttt{258EAFA5-E914-47DA-95CA-C5A\\B0DC85B11} verbunden und ein SHA-1 Hashwert gebildet. Dieser Wert wird in einer Base64-Kodierung im Feld \texttt{Sec-WebSocket-Accept} übermittelt. Der Client kann beim Empfang der Nachricht anhand des gleichen Vorgehens einen SHA-1 Hash erzeugen und mit dem empfangenen vergleichen. 
+\noindent Damit der Server bestätigen kann, dass der Handshake eingetroffen ist, wird der  übermittelte \texttt{Sec-WebSocket-Key} mit dem Globally Unique Identifier (GUID) \texttt{258EAFA5-E914-47DA-95CA-C5A\\B0DC85B11}, welcher das WebSocket-Protokoll identifiziert, verbunden und ein SHA-1 Hashwert gebildet. Dieser Wert wird in einer Base64-Kodierung im Feld \texttt{Sec-WebSocket-Accept} übermittelt. Der Client kann beim Empfang der Nachricht anhand des gleichen Vorgehens einen SHA-1 Hash erzeugen und mit dem empfangenen vergleichen. Dieses Verfahren wird eingesetzt, um zu verhindern, dass der Server Verbindungen annimmt, die keine WebSocket-Verbindungen sind. Dadurch sollen Angreifer gehindert werden, über Formulareingaben oder \texttt{XMLHttpRequests} den WebSocket-Server zu manipulieren \autocite[7]{fette_websocket_2011}.
 
 \begin{description}
 	\item[1. Kombinierter Wert] \texttt{1zUsRVYbBDvRKqqZq9cRsg==258EAFA5-E914-47DA-95CA-C5AB0DC85B11}
@@ -392,12 +403,12 @@ Da Verbindungen über die Ports 80 bzw. 443 in den meisten Firewalls zugelassen 
 	\item[3. Base64 Kodierung] \texttt{mi8r8dWsVBJS1B3908SLbnd5tHM=}
 \end{description}
 
-\noindent Des weiteren teilt der Server dem Client mit, dass die Erweiterung \texttt{permessage-deflate} unterstützt wird. Die maximale Größe eines Sliding Windows beträgt demnach $ 2^{15} \texttt{ Byte} =  32 \texttt{ KB}$. Als HTTP-Status wird der Code \texttt{101 Switching Protocols} angegeben. Dieser wird eingesetzt, um zu signalisieren, dass absofort das WebSocket-Protokoll genutzt wird. Weitere Anwendung findet dieser Status-Code beim Wechsel von HTTP-Versionen \autocite{leach_hypertext_1999}. Meldet der Server einen anderen Status, so wird angenommen, dass der WebSocket Handshake nicht vollständig durchgeführt werden konnte und die Semantik von HTTP gilt \autocite[7]{fette_websocket_2011}. Ebenso wird verfahren, wenn der vom Client ermittelte Hashwert nicht mit dem vom Server übertragenen \texttt{Sec-WebSocket-Accept} übereinstimmt.\\
+\noindent Des weiteren teilt der Server dem Client mit, dass die Erweiterung \texttt{permessage-deflate} unterstützt wird. Die maximale Größe eines LZ77 Sliding Windows beträgt demnach $ 2^{15} \texttt{ Byte} =  32 \texttt{ KB}$. Als HTTP-Status wird der Code \texttt{101 Switching Protocols} angegeben. Dieser wird eingesetzt, um zu signalisieren, dass ab sofort das WebSocket-Protokoll genutzt wird. Weitere Anwendung findet dieser Status-Code beim Wechsel von HTTP-Versionen \autocite{leach_hypertext_1999}. Meldet der Server einen anderen Status, so wird angenommen, dass der WebSocket Handshake nicht vollständig durchgeführt werden konnte und die Semantik von HTTP gilt \autocite[7]{fette_websocket_2011}. Ebenso wird verfahren, wenn der vom Client ermittelte Hashwert nicht mit dem vom Server übertragenen \texttt{Sec-WebSocket-Accept} übereinstimmt.\\
 
 \noindent Optionale Felder können ebenfalls übertragen werden. Hierzu zählt beispielsweise das Header-Feld \texttt{Sec-WebSocket-Protocol}, das angibt welches Sub-Protokoll für die Übertragung genutzt werden soll. Hat der Server den Opening Handshake erfolgreich zurückgesendet, so gilt die WebSocket-Verbindung als geöffnet und Daten können gesendet werden.
 
 \subsubsection{Datentransfer}\label{subsubsec:wsData}
-Befindet sich die WebSocket-Verbindung nach dem erfolgreichen Opening-Handshake im Status \texttt{OPEN}, so können Daten gesendet werden. Wie in Abschnitt \ref{subsubsec:wsHeader} erläutert, definiert das Header-Feld \texttt{opcode} eines WebSocket-Frames die übertragene Art von Nutzdaten. Aktuell sind lediglich Text- und Binärdaten offiziell spezifiert. 
+Befindet sich die WebSocket-Verbindung nach dem erfolgreichen Opening-Handshake im Status \texttt{OPEN}, so können Daten bidirektional gesendet werden. Wie in Abschnitt \ref{subsubsec:wsHeader} erläutert, definiert das Header-Feld \texttt{opcode} eines WebSocket-Frames die übertragene Art von Nutzdaten. Aktuell sind lediglich Text- und Binärdaten offiziell spezifiert. 
 
 \begin{figure*}[ht]
 	\begin{center}
@@ -415,9 +426,9 @@ Befindet sich die WebSocket-Verbindung nach dem erfolgreichen Opening-Handshake 
 \noindent In Abbildung \ref{fig:wsDataTransfer} ist eine Nachricht mit dem Inhalt \texttt{WebSocket 2018} von einem Server an einen Client gesendet worden. Als \texttt{opcode} wurde \texttt{0x1} angegeben, welcher besagt, dass es sich bei der Art des Payloads um eine Textnachricht handelt. Die Größe der Nutzdaten beträgt 14 Byte und die Nachricht konnte ohne Fragmentierung vollständig übertragen werden.
 
 \subsubsection{Verbindungsabbau}\label{subsubsec:wsClose}
-Der Abbau einer WebSocket-Verbindung erfolgt anhand eines Closing-Handshakes. Er soll den \texttt{FIN/ACK} Closing-Handshake von TCP ergänzen, da dieser insbesondere bei der Verwendung von Proxy Servern oder Vermittlungsstellen nicht garantiert zwischen genau zwei Endpunkten abläuft \autocite[9]{fette_websocket_2011}. Laut RFC6455 sollen so Szenarien vermieden werden, in denen Daten unnötigerweise verloren gehen. \\
+Der Abbau einer WebSocket-Verbindung erfolgt anhand eines Closing-Handshakes. Er soll den \texttt{FIN/ACK} Closing-Handshake von TCP ergänzen, da dieser insbesondere bei der Verwendung von Proxy-Servern oder Vermittlungsstellen nicht garantiert zwischen genau zwei Endpunkten abläuft \autocite[9]{fette_websocket_2011}. Laut RFC6455 sollen so Szenarien vermieden werden, in denen Daten unnötigerweise verloren gehen. Wird beispielsweise ein Proxy-Server verwendet, so verbindet sich ein Client mit diesem anstelle des eigentlichen Ziels. Der Proxy-Server stellt daraufhin selbst eine Verbindung zu dem Zielhost her und vermittelt die Pakete zwischen Client und Server. Schließt einer der Endpunkte die TCP-Verbindung, obwohl der andere Kommunikationspartner noch Daten überträgt, so kann es sein, dass die Verbindung zwischen dem Proxy und dem schließenden Endpunkt bereits abgebaut ist. Die noch ausstehende Datenübertragung schlägt fehl. Über den zusätzlichen Closing-Handshake des WebSocket-Protokolls wird die zugrundeliegende TCP-Verbindung erst geschlossen, wenn die WebSocket-Sitzung bereits abgebaut ist.\\
 
-\noindent Die Einleitung eines Verbindungsabbaus kann sowohl vom Client, als auch vom Server erfolgen. Dazu wird ein Frame mit dem \texttt{opcode}-Wert \texttt{0x8} an den Kommunikationspartner versendet. Der versendende Endpunkt wechselt mit dem Absenden des Closing-Frames vom \texttt{OPEN} in den \texttt{CLOSING} Status. Ebenso gilt dies beim Empfang eines Closing-Frames insofern selbst noch keiner versendet wurde. Danach eintreffende oder zu sendende Nachrichten müssen verworfen werden. Haben beide Endpunkte sowohl einen Closing-Frame gesendet, als auch empfangen, so gilt die Verbindung als beendet und die darunterliegende TCP-Verbindung kann geschlossen werden. Dies sollte stets vom Server begonnen werden, damit er im \texttt{TIME WAIT} Status verbleibt. Der Client kann so die Verbindung durch das Senden eines neuen \texttt{SYN} unverzüglich wieder eröffnen \autocite[41]{fette_websocket_2011}. \\
+\noindent Die Einleitung eines Verbindungsabbaus kann sowohl vom Client, als auch vom Server erfolgen. Dazu wird ein Frame mit dem \texttt{opcode}-Wert \texttt{0x8} an den Kommunikationspartner versendet. Der versendende Endpunkt wechselt mit dem Absenden des Closing-Frames vom \texttt{OPEN} in den \texttt{CLOSING} Status. Ebenso gilt dies beim Empfang eines Closing-Frames insofern selbst noch keiner versendet wurde. Danach eintreffende oder zu sendende Nachrichten müssen verworfen werden. Haben beide Endpunkte sowohl einen Closing-Frame gesendet, als auch empfangen, so gilt die Verbindung als beendet (Status: \texttt{CLOSED}) und die darunterliegende TCP-Verbindung kann geschlossen werden. Dies sollte stets vom Server begonnen werden, damit er im \texttt{TIME WAIT} Status verbleibt. Der Client kann so die Verbindung durch das Senden eines neuen \texttt{SYN} unverzüglich wieder eröffnen \autocite[41]{fette_websocket_2011}. Die Zustände die ein WebSocket annehmen kann sowie deren Übergänge, sind detailliert in Abbildung \ref{fig:wsLifeCycle} auf Seite \pageref{fig:wsLifeCycle} dargestellt. \\
 
 \begin{figure}[ht] 
 	\begin{center}
@@ -447,7 +458,7 @@ Die regelmäßigen Abfragen des einfachen Pollings führen zu einem enormen Over
 \subsubsection{Comet}\label{subsubsec:Comet}
 Auf Grund diverser Limitierungen für Mehrbenutzeranwendungen, entwickelten sich Programmiermodelle, welche unter der Bezeichnung \textit{Comet} \autocite{russell_comet_2006} zusammengefasst wurden. Da es sich hierbei nicht um einen spezifizierten Standard handelt, wurde im Rahmen des CometD-Projekts der Dojo Foundation das Bayeux-Protokoll ins Leben gerufen. Ziel des Projekts ist die Reduzierung der Komplexität bei der Implementierung von Comet Anwendungen \autocite{russell_cometd_2007}. Um dies zu erreichen wurden Referenzimplementierungen des Bayeux-Protokolls in verschiedenen Programmiersprachen bereitgestellt. \\
 
-\noindent Neben der Verwendung des Long-Polling Mechanismus zur ereignisgesteuerten Nachrichtenübertragung von Server zu Client, sieht das Bayeux-Protokoll auch Streaming-Techniken vor. Dabei wird die HTTP-Verbindung nach der Antwort des Servers auf den Request des Clients nicht geschlossen, sondern anhand des Connection-Headers \texttt{keep-alive} weiterhin offen gehalten. Somit können weitere Nachrichten vom Server an den Client gesendet werden, ohne dass eine erneute Anfrage durch den Client gestellt werden muss. \\
+\noindent Neben der Verwendung des Long-Polling Mechanismus zur ereignisgesteuerten Nachrichtenübertragung von Server zu Client, sieht das Bayeux-Protokoll auch Streaming-Techniken vor. Dabei wird die HTTP-Verbindung nach der Antwort des Servers auf den Request des Clients nicht geschlossen, sondern anhand des Connection-Headers \texttt{keep-alive} weiterhin offen gehalten. Somit können weitere Nachrichten vom Server an den Client gesendet werden, ohne dass eine erneute Anfrage durch den Client gestellt werden muss. Abbildung \ref{fig:wsBayeuxStream} illustriert die Übertragung einer Nachricht \texttt{M0} von einem Client, der in einem Webbrowser (\texttt{User Agent}) ausgeführt wird, zu einem Webserver \texttt{Origin Server}, auf welchem die serverseitige Implementierung des Bayeux-Protokolls ausgeführt wird. Die Übertragung erfolgt als HTTP Request und die korrespondierende Antwort des Servers als HTTP Response. Die Nachricht des Servers enthält dabei etwaige Bayeux-Events \texttt{E}. Nach der Übermittlung von \texttt{M1(E0)} wird die Verbindung nicht geschlossen, sodass der Server weiterhin Events an den Client übertragen kann. 
 
 \begin{figure}[ht] 
 	\begin{center}
@@ -456,6 +467,7 @@ Auf Grund diverser Limitierungen für Mehrbenutzeranwendungen, entwickelten sich
 		\label{fig:wsBayeuxStream}
 	\end{center}
 \end{figure}
+
 
 \noindent Allerdings muss die Verwendung von HTTP-Streaming von den User Agenten unterstützt werden, da unvollständige HTTP Responses für dieses Verfahren genutzt werden \autocite{russell_cometd_2007}. Um bidirektional kommunizieren zu können verwendet das Bayeux-Protokoll zwei HTTP-Verbindungen, wohingegen das WebSocket-Protokoll mit einer einzigen Verbindung arbeitet. Der größte Nachteil des Bayeux-Protokolls ist jedoch die fehlende Standardisierung durch eine etablierte Organisation. 
 
@@ -479,7 +491,7 @@ Das Erstellen eines WebSocket-Endpunkts erfolgt laut Spezifikation anhand des Ko
 \noindent Wird die URL nicht im korrekten Schema angegeben, so wird eine \texttt{DOMException} mit der Beschreibung \texttt{SyntaxError} ausgelöst. Falls Sub-Protokolle angegeben werden, so sendet der Client diese bei der Anfrage im HTTP-Headerfeld \texttt{Sec-WebSocket-Protocol}. Wenn Server und Client ein gemeinsames Protokoll vereinbaren konnten, wird es im schreibgeschützten Attribut \texttt{protocol} abgelegt. Etwaige Erweiterungen werden nach dem erfolgreichen Verbindungsaufbau im Attribut \texttt{extensions} abgelegt.
 \subsubsection{WebSocket Lebenszyklus}
 Jede WebSocket-Verbindung unterliegt einem Lebenszyklus. Die Spezifikation unterscheidet hier vier mögliche Zustände, die als konstante Zahlenwerte hinterlegt sind. Je nachdem in welchem Zustand sich der WebSocket gerade befindet, wird der Wert einer dieser Konstanten im Attribut \texttt{readyState} abgelegt \autocite{whatwg_html_2010}. \newpage
-\begin{figure}[ht] 
+\begin{figure}[ht] \label{fig:wsLifeCycle}
 	\begin{center}
 		\includegraphics[scale=0.75]{img/wslifecycle.pdf}
 		\caption{UML-Zustandsdiagramm des WebSocket Lifecycle}
@@ -659,7 +671,7 @@ Die Java\texttrademark API for WebSocket kann auf zwei unterschiedliche Weisen v
 
 \noindent Die Java\texttrademark{} API for WebSocket sieht dafür die Annotationen \texttt{@OnOpen}, \texttt{@OnError}, \texttt{@OnMessage} und \texttt{@OnClose} vor. Jede auf diese Weise deklarierte Methode ermöglicht die Angabe einiger Parameter. Die aktuell verwendete \texttt{Session} kann dabei immer empfangen werden. \\
 
-\subsubsection{Kommunikation}
+\subsubsection{Kommunikation}\label{subsubsec:javaKommunikation}
 Der RFC6455 definiert Ping- und Pong-Frames, durch die beispielsweise geprüft werden kann, ob ein Endpunkt noch erreichbar ist oder um eine inaktive Verbindung aufrechtzuerhalten. Allerdings spezifiert die W3C WebSocket API keine Möglichkeit, diese Art von Control-Frames zu versenden. Die Java API hingegen stellt dafür die Methoden \texttt{sendPing()} und \texttt{sendPong()} zur Verfügung, die ein \texttt{ByteBuffer}-Objekt als Parameter empfangen, über welches Nutzdaten mit bis zu 125 Byte angehängt werden können. Diese Limitierung wird aufgrund der im RFC6455 definierten Größe von Control-Frames durch eine \texttt{IllegalArgumentException} sichergestellt.\\
 
 \begin{lstlisting}[frame=single, language=Java, caption=Java: Ping/Pong Nachrichten, label=lst:PingPong]
@@ -720,7 +732,7 @@ public class MyHandler implements SendHandler {
 }
 \end{lstlisting}
 
-\noindent Beide Varianten der asynchronen Nachrichtenübermittlung können sowohl textuelle, als auch binäre Daten übertragen. Für das Senden komplexer Strukturen oder eigener Objekte wird auch hier ein Encoder benötigt. Ping- bzw. Pong-Nachrichten können nicht asynchron übertragen werden. Die Notwendigkeit asynchroner Übertragung ist in diesem Fall auch nicht gegeben, da diese Control-Frames maximal 125 Byte Nutzdaten enthalten können und dementsprechend selbst bei geringen Bandbreiten unverzüglich übermittelt werden \autocite[120]{coward_java_2014}.
+\noindent Beide Varianten der asynchronen Nachrichtenübermittlung können sowohl textuelle, als auch binäre Daten übertragen. Für das Senden komplexer Strukturen oder eigener Objekte wird auch hier ein Encoder benötigt. Ping- bzw. Pong-Nachrichten können nicht asynchron übertragen werden. Die Notwendigkeit asynchroner Übertragung ist in diesem Fall auch nicht gegeben, da diese Control-Frames maximal 125 Byte Nutzdaten enthalten können und dementsprechend selbst bei geringen Bandbreiten unverzüglich übermittelt werden \autocite[120]{coward_java_2014}. Die Entscheidung für eine der beiden Varianten der asynchronen Nachrichtenübertragung hängt von verschiedenen Faktoren ab. Soll nur eine kleine Anzahl anderer Aufgaben während des Sendevorgangs erledigt werden, so kann die Nachricht \textit{by future} versendet, anschließend andere Aufgaben gestartet und nach deren Beendigung durch den Aufruf der \texttt{get()}-Methode auf die Sendebestätigung gewartet werden. Dieser Ansatz blockiert dadurch einen laufenden Thread. Folgen jedoch weitere Aufgaben nach dem Versand der Nachricht, deren Bearbeitung Vorrang hat, so sollten \texttt{Handler} eingesetzt werden. Die Benachrichtigung einer eintreffenden Sendungsbestätigung muss hierbei durch einen eigenen Thread der zugrundeliegenden WebSocket-Implementierung erfolgen \autocite[123]{coward_java_2014}. Dieser Ansatz blockiert dadurch nicht den laufenden Thread des eigenen Programms. Zu beachten ist weiterhin, dass lediglich durch die Verwendung des \texttt{Future}-Ansatzes das Senden einer Nachricht abgebrochen werden kann.
 
 \subsubsection{En- und Decoding}\label{subsubsec:DeEnCoding}
 Die W3C WebSocket-API definiert lediglich textuelle und binäre Datentypen zur Übermittlung von Nutzdaten und entspricht damit den Anforderungen, die im RFC6455 für das WebSocket-Protokoll festgelegt wurden. Die Java WebSocket-API stellt hierfür standardisierte Methoden bereit, die das Senden eines \texttt{String}-Objekts oder binärer Datentypen wie \texttt{ByteBuffer} bzw. \texttt{byte[]} ermöglichen. In vielen Fällen ist es jedoch von Vorteil, komplexere Datentypen oder eigene Objekte übertragen zu können. Dafür wurde die \texttt{send}-Methode der \texttt{RemoteEndpoint}-Schnittstelle überladen, sodass sie einen Parameter vom Typ \texttt{Object} empfängt. Mit Hilfe dieser Methode lassen sich demnach Objekte eines beliebigen Datentyps versenden. Da das WebSocket-Protokoll aber lediglich textuelle oder binäre Daten kennt, müssen alle komplexeren Objekte in eine dieser beiden Formen gebracht werden. Zu diesem Zweck wurden die Schnittstellen \texttt{Encoder} und \texttt{Decoder} im Paket \texttt{javax.websocket} bereitgestellt. Über untergeordnete Schnittstellen kann zwischen der Umwandlung in textuelle oder binäre Daten gewählt werden. \medskip
@@ -803,8 +815,7 @@ Die Spezifikation des WebSocket-Protokolls ermöglicht die Bereitstellung von Su
 		public void afterResponse(HandshakeResponse hr) {
 			// Pruefen, ob Feature aktiviert werden konnte
 			boolean activated = hr.getHeaders().get("My-Feature-Field").get(0)
-												.equals("activated");
-			
+												.equals("activated");		
 			if(activated){
 				// MyFeature nutzen
 			} else {
@@ -869,6 +880,24 @@ Die Spezifikation des WebSocket-Protokolls ermöglicht die Bereitstellung von Su
 		}
 	}
 \end{lstlisting}
+
+\noindent Durch den Einsatz der \texttt{EndpointConfig}-Klassen werden Einstellungen getroffen, die übergreifend für alle verbundenen Endpunkte gelten. Das \texttt{Session}-Objekt hingegen repräsentiert alle Einstellungen und Zustände, bezüglich einer einzelnen WebSocket-Verbindung. Für einen WebSocket-Client exisitiert nur eine \texttt{Session}, wohingegen ein WebSocket-Server Zugriff zu allen verbundenen Clients hat. Ein \texttt{Session}-Objekt wird bei einer erfolgreich aufgebauten Verbindung erstellt und kann über die mit \texttt{@OnOpen} gekennzeichnete Methode empfangen werden. Durch den Aufruf der Methode \texttt{getId()} lässt sich ein eindeutiger Bezeichner zur Identifizierung einer \texttt{Session} ermitteln. Weiterhin können zur Laufzeit die Methoden zur Bearbeitung von Events ermittelt, hinzugefügt oder entfernt werden. Ändert sich im Laufe einer Verbindung beispielsweise die Art, wie ein Client Nachrichten bearbeiten soll, so kann durch den Aufruf der \texttt{removeMessageHandler}- sowie \texttt{addMessageHandler}-Methode des zugehörigen \texttt{Session}-Objekts der \texttt{@OnMessage}-Handler ausgetauscht werden. Wie bereits in Abschnitt \ref{subsubsec:javaKommunikation} dargestellt, erfolgt das Senden von Nachrichten über \texttt{Basic}- oder \texttt{Async}-Objekte des \texttt{RemoteEndpoint}-Interfaces. Diese werden durch die Methoden \texttt{getBasicRemote()} respektive \texttt{getAsyncRemote()} der zugehörigen \texttt{Session} bereitgestellt. \\
+
+\noindent Die Konfiguration verschiedener verbindungsspezifischer Eigenschaften kann ebenfalls über das \texttt{Session}-Objekt verändert werden. Auf einige dieser Merkmale ist der Zugriff lediglich lesend möglich, da deren Werte während des Verbindungsaufbaus zwischen Server und Client ausgehandelt werden. Hierbei handelt es sich um die Liste der verfügbaren Subprotokolle und Erweiterungen, die verwendete Protokollversion und den authentifizierten Benutzer, repräsentiert durch ein Java \texttt{UserPrincipal}-Objekt. Des weiteren kann geprüft werden, ob die Verbindung verschlüsselt erfolgt. Schreibender Zugriff ist auf folgende Eigenschaften möglich: 
+
+\begin{description}
+	\item[\texttt{userProperties}] Ein \texttt{map}-Objekt, in dem benutzerspezifische Schlüssel-Werte-Paare gespeichert werden können.
+	\item[\texttt{maxBinaryMessageSize}] Beschränkt die Größe einer ankommenden binären Nachricht. 
+	\item[\texttt{maxTextMessageSize}] Beschränkt die Größe einer ankommenden textuellen Nachricht. 
+	\item[\texttt{maxIdleTimeout}] Legt den längsten Zeitabstand fest, indem keine Aktivität zwischen den Endpunkten festgestellt wird, bevor die Verbindung geschlossen wird.
+\end{description}
+
+\noindent Alle Eigenschaften sind auch übergreifend für alle Endpunkte konfigurierbar. Beispielsweise kann die Beschränkung der Nachrichtengröße auch innerhalb der Annotation \texttt{@OnMessage} als Parameter hinterlegt werden. Es gilt daher abzuwägen, ob die Konfiguration nur individuell für bestimmte Clients oder übergreifend zutreffen soll. \\
+
+\noindent Der Lebenszyklus einer WebSocket-Verbindung (siehe Abbildung \ref{fig:wsAPIZustand}) kann durch das \texttt{Session}-Objekt der Java WebSocket API überprüft und gesteuert werden. Die Methode \texttt{isOpen()} zeigt an, ob diese geöffnet ist und \texttt{getOpenSessions()} listet alle offenen Verbindungen zu dem Endpunkt auf, mit welchem das verwendete \texttt{Session}-Objekt verbunden ist. Allerdings können diese Methoden nicht garantieren, dass die zugrundeliegenden Verbindungen tatsächlich geöffnet sind. Wurde der andere Endpunkt unerwartet beendet oder die Verbindung getrennt, erfolgt keine Benachrichtigung darüber. Um sicherzugehen kann eine \texttt{PingMessage} an den gegenüberliegenden Endpunkt gesendet und auf eine entsprechende Bestätigung gewartet werden. Soll eine Verbindung geschlossen werden, erfolgt dies über den Aufruf der \texttt{close()}-Methode. Optional kann ein \texttt{CloseReason}-Argument übergeben werden, in dem ein \texttt{CloseCode} und eine textuelle Begründung hinterlegt werden können. Diese können von dem \texttt{@OnClose}-Handler des empfangenden Endpunkts abgefragt und interpretiert werden. 
+
+
+
 
 
 \subsubsection{Path-Mapping}\label{subsubsec:apiPathMapping}
