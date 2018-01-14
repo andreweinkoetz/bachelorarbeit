@@ -181,7 +181,7 @@ Die Arbeit an der Spezifikation des WebSocket-Protokolls begann bereits 2009, al
 \end{center}
 \end{figure}
 
-\noindent Die Aufgabe des WebSocket-Protokolls ist die bidirektionale Kommunikation zwischen einer (Web-)Anwendung und einem WebSocket-Server. Dabei folgt das Protokoll dem Prinzip des minimalen \textit{Framings} \autocite[9-10]{fette_websocket_2011}. Das bedeutet, dass Zusatzinformation zur Übermittlung von Nachrichten, wie z.B. Protokoll-Header, möglichst gering zu halten sind. Das Konzept sieht vor, dass das WebSocket-Protokoll direkt als Schicht auf das \textit{Transmission Control Protocol} (TCP) aufsetzt und es neben HTTP in einer bereits bestehenden Infrastruktur eingesetzt werden kann. Dabei wird das Sicherheitsmodell der Same-Origin-Policy aus RFC 6454 sowie ein Adressierungs- und Bezeichnungsmechanismus hinzugefügt, durch welchen die Unterstützung mehrerer Dienste auf einem Port und verschiedener Hostnamen unter einer IP-Adresse sichergestellt wird. Des weiteren soll das aufgesetzte Framing den Paketierungsmechanismus des \textit{Internet Protocols} (IP) imitieren, ohne die Länge eines Frames zu beschränken. Zudem wird ein zusätzlicher \textit{Closing-Handshake} definiert, der auch bei der Verwendung von Proxy-Servern und anderen \textit{Vermittlern}, wie z.B. Firewalls, zwischen den beiden Endpunkten durchgeführt werden kann. Obwohl das WebSocket-Protokoll die für HTTP(S) vorgesehenen Ports 80 und 443 verwendet, verbindet die beiden Protokolle lediglich der \textit{HTTP Upgrade}-Mechanismus. Dieser kommt zum Einsatz, wenn eine WebSocket-Verbindungsanfrage von einem HTTP-Server interpretiert wird.
+\noindent Die Aufgabe des WebSocket-Protokolls ist die bidirektionale Kommunikation zwischen einer (Web-)Anwendung und einem WebSocket-Server. Dabei folgt das Protokoll dem Prinzip des minimalen \textit{Framings} \autocite[9-10]{fette_websocket_2011}. Das bedeutet, dass Zusatzinformation zur Übermittlung von Nachrichten, wie z.B. Protokoll-Header, möglichst gering zu halten sind. Das Konzept sieht vor, dass das WebSocket-Protokoll direkt als Schicht auf das \textit{Transmission Control Protocol} (TCP) aufsetzt und es neben HTTP in einer bereits bestehenden Infrastruktur eingesetzt werden kann. Dabei wird das Sicherheitsmodell der Same-Origin-Policy aus RFC 6454 sowie ein Adressierungs- und Bezeichnungsmechanismus hinzugefügt, durch welchen die Unterstützung mehrerer Dienste auf einem Port und verschiedener Hostnamen unter einer IP-Adresse sichergestellt wird. Des weiteren soll das aufgesetzte Framing den Paketierungsmechanismus des \textit{Internet Protocols} (IP) imitieren, ohne die Länge eines Frames zu beschränken. Außerdem wird ein zusätzlicher \textit{Closing-Handshake} definiert, der auch bei der Verwendung von Proxy-Servern und anderen \textit{Vermittlern}, wie z.B. Firewalls, zwischen den beiden Endpunkten durchgeführt werden kann. Obwohl das WebSocket-Protokoll die für HTTP(S) vorgesehenen Ports 80 und 443 verwendet, verbindet die beiden Protokolle lediglich der \textit{HTTP Upgrade}-Mechanismus. Dieser kommt zum Einsatz, wenn eine WebSocket-Verbindungsanfrage von einem HTTP-Server interpretiert wird. Soll die WebSocket-Verbindung verschlüsselt sein, so kann dies durch die Verwendung eines \textit{Transport Layer Security} (TLS) Tunnels erreicht werden.
 
 \subsection{WebSocket-Frames}\label{subsec:wsFrames}
 Die Spezifikation eines WebSocket-Frames sieht eine Zweiteilung vor, wie sie bei Protokollnachrichten üblicherweise vorgenommen wird. Ein WebSocket-Frame besteht demnach aus einem Header Bereich der Kontrolldaten enthält, sowie dem Payload, welcher die Nutzdaten beinhaltet.\vspace{2mm}
@@ -894,26 +894,119 @@ Die Spezifikation des WebSocket-Protokolls ermöglicht die Bereitstellung von Su
 
 \noindent Alle Eigenschaften sind auch übergreifend für alle Endpunkte konfigurierbar. Beispielsweise kann die Beschränkung der Nachrichtengröße auch innerhalb der Annotation \texttt{@OnMessage} als Parameter hinterlegt werden. Es gilt daher abzuwägen, ob die Konfiguration nur individuell für bestimmte Clients oder übergreifend zutreffen soll. \\
 
-\noindent Der Lebenszyklus einer WebSocket-Verbindung (siehe Abbildung \ref{fig:wsAPIZustand}) kann durch das \texttt{Session}-Objekt der Java WebSocket API überprüft und gesteuert werden. Die Methode \texttt{isOpen()} zeigt an, ob diese geöffnet ist und \texttt{getOpenSessions()} listet alle offenen Verbindungen zu dem Endpunkt auf, mit welchem das verwendete \texttt{Session}-Objekt verbunden ist. Allerdings können diese Methoden nicht garantieren, dass die zugrundeliegenden Verbindungen tatsächlich geöffnet sind. Wurde der andere Endpunkt unerwartet beendet oder die Verbindung getrennt, erfolgt keine Benachrichtigung darüber. Um sicherzugehen kann eine \texttt{PingMessage} an den gegenüberliegenden Endpunkt gesendet und auf eine entsprechende Bestätigung gewartet werden. Soll eine Verbindung geschlossen werden, erfolgt dies über den Aufruf der \texttt{close()}-Methode. Optional kann ein \texttt{CloseReason}-Argument übergeben werden, in dem ein \texttt{CloseCode} und eine textuelle Begründung hinterlegt werden können. Diese können von dem \texttt{@OnClose}-Handler des empfangenden Endpunkts abgefragt und interpretiert werden. 
-
-
-
-
+\noindent Der Lebenszyklus einer WebSocket-Verbindung (siehe Abbildung \ref{fig:wsAPIZustand}) kann durch das \texttt{Session}-Objekt der Java WebSocket API überprüft und gesteuert werden. Die Methode \texttt{isOpen()} zeigt an, ob diese geöffnet ist und \texttt{getOpenSessions()} listet alle offenen Verbindungen zu dem Endpunkt auf, mit welchem das verwendete \texttt{Session}-Objekt verbunden ist. Allerdings können diese Methoden nicht garantieren, dass die zugrundeliegenden Verbindungen tatsächlich geöffnet sind. Wurde der andere Endpunkt unerwartet beendet oder die Verbindung getrennt, erfolgt keine Benachrichtigung darüber. Um sicherzugehen kann eine \texttt{PingMessage} an den gegenüberliegenden Endpunkt gesendet und auf eine entsprechende Bestätigung gewartet werden. Soll eine Verbindung geschlossen werden, erfolgt dies über den Aufruf der \texttt{close()}-Methode. Optional kann ein \texttt{CloseReason}-Argument übergeben werden, in dem ein \texttt{CloseCode} und eine textuelle Begründung hinterlegt werden können. Diese können von dem \texttt{@OnClose}-Handler des empfangenden Endpunkts abgefragt und interpretiert werden. \\
 
 \subsubsection{Path-Mapping}\label{subsubsec:apiPathMapping}
+Die Konfiguration eines WebSocket-Serverendpunkts verlangt die Angabe eines Pfades, unter welchem der Endpunkt relativ zum Kontextpfad der Anwendung erreichbar ist. Die Zuordnung dieses Pfads auf einen bestimmten Endpunkt wird als \textit{Path Mapping} bezeichnet. Die Identifikation eines WebSocket-Serverendpunkt erfolgt durch einen \textit{Unique Resource Identifier} (URI). Der Aufbau des URI für WebSocket-Verbindungen erfolgt nach folgendem Schema:\\
 
-% Es fehlt noch  Path Mapping
+\noindent \texttt{<ws-protocol-scheme>://<host>:<port>/<uri-path>?<query-string>}\\
+
+\noindent Das Protokollschema ist analog zu HTTP \textit{http(s)} bei WebSocket-URIs \textit{ws(s)}. Dabei entspricht die \textit{wss}-Angabe einer verschlüsselten WebSocket-Verbindung. Die Angabe des Hosts kann sowohl durch dessen IP-Adresse, als auch seinen kanonischen Namen erfolgen. Die Angabe der Port-Nummer muss lediglich dann erfolgen, wenn der zugehörige Webserver nicht unter den für WebSockets standardisierten Ports 80 bzw. 443 erreichbar ist. Der URI-Pfad entspricht der \texttt{value}-Angabe in der Konfiguration des Serverendpunkts. Es gilt zu beachten, dass insbesondere bei der Verwendung von \textit{Java Web Archiven} (WAR) der Name der Anwendung häufig als deren Ausgangspunkt verwendet wird. Trägt die WAR-Datei die Bezeichnung \textit{example} und der WebSocket-Serverendpunkt ist unter \textit{/test} erreichbar, so lautet der URI-Pfad \textit{/example/test}. \\
+
+\noindent Der URI-Pfad kann dabei exakt oder unter Verwendung von \textit{URI Templates} angegeben werden. Für die exakte Angabe ist es ausreichend, die URI-Pfadsegmente im \texttt{value}-Feld des WebSocket-Servers, getrennt durch \texttt{/}, zu hinterlegen. Clients können daraufhin die Verbindung unter diesem Pfad herstellen. Die Verwendung eines \textit{URI Templates} ermöglicht die Angabe von Pfadvariablen, durch die verschiedene Aufrufe der URI unterschiedlich interpretiert werden können. Die Pfadvariablen werden durch geschweifte Klammern innerhalb des URI-Pfads angegeben und dürfen lediglich einfache Bezeichner ohne reservierte Sonderzeichen enthalten. Ein gültiger URI-PFad unter Verwendung von Templates wäre demnach: \\
+
+\noindent\texttt{/app/\{access-level\}/v1}\\
+
+\noindent Der Aufruf des URI-Pfads mit verschiedenen Werten wie z.B. \texttt{/app/new/v1} oder \texttt{/app/gold/v1} ist demnach gültig und kann von dem WebSocket-Serverendpunkt unter Verwendung des \texttt{Session}-Objekts interpretiert werden. Dazu kann die Methode \texttt{getPathParameters()} eingesetzt werden. Das zurückgelieferte \texttt{Map}-Objekt beinhaltet die Pfadvariablen, wobei der Schlüsselwert der \texttt{Map} dem Variablennamen und der Wert dem übergebenen \texttt{String} entspricht. Zudem kann die Annotation \texttt{@PathParam} verwendet werden. Durch diese kann in einer der Methoden des WebSocket-Lebenszyklus der angegebene Pfadparameter als Parameter der Methode empfangen werden.\medskip
+
+\begin{lstlisting}[frame=single, language=Java, caption=Java: PathParam]
+	@ServerEndpoint(value="/app/{access-level}")
+	public class MyServer{
+		@OnOpen
+		public void onOpen(@PathParam("access-level") String level, String message) {
+			// Nachricht differenziert nach Berechtigung bearbeiten.
+		}
+	}
+\end{lstlisting}
+
+\noindent Als Datentypen für \texttt{@PathParam}-Parameter können alle primitiven Datentypen verwendet werden. Die Umwandlung in den jeweiligen Zieldatentyp erfolgt automatisch. Kann die Konvertierung nicht durchgeführt werden, so führt dies zu einer \texttt{DecodeException}. Die WebSocket-Verbindung wird jedoch nicht automatisch beendet.\\
+
+\noindent Die optionale Übergabe zusätzlicher Parameter kann durch die Verwendung von \textit{Query Strings} erfolgen. Dazu können Schlüssel-Werte-Paare an den URI-Pfad mit \textit{?} angehängt und durch \textit{\&} verknüpft werden. Query Strings werden von der WebSocket-Implementierung bei der Auswahl des zu verbindenden Endpunkts ignoriert \autocite[156]{coward_java_2014}. Sie können jedoch beim Verbindungsaufbau genutzt werden, um beispielsweise benutzerspezifische Einstellungen vorzunehmen. Hierfür kann die Methode \texttt{getQueryString()} oder \texttt{getRequestParameterMap()} des \texttt{Session}-Objekts verwendet werden. Erstere liefert die vollständige Zeichenkette, die nach dem URI-Pfad folgt wohingegen die zweite Methode ein \texttt{Map<String, List<String>{}>}-Objekt der Parameter erstellt. Ein gültiger Aufruf mit Parametern in einem Query String wären beispielsweise:\\
+
+\noindent\texttt{/app/\{access-level\}/v1?username=admin\&password=secure}\\
+\noindent\texttt{/app/premium?showpictures=1}\\
+
+\noindent Durch die Verwendung der \texttt{getRequestParameterMap()}-Methode können diese Parameter eingesehen und verarbeitet werden. Eine Kombination aus Pfadparametern und Query Strings ist ebenfalls möglich. Bei der Auswahl der Übertragungsart verbindungsspezifischer Parameter sollte beachtet werden, dass Pfadparameter nur einzelne Werte für einen Schlüssel zulassen, Query Strings jedoch eine Listenstruktur ermöglichen. Sollen Parameter ohne einen Neustart der Verbindung übertragen werden, so müssen diese als WebSocket-Nachrichten gesendet werden. Der Autor eines Großteils der Java\texttrademark API for WebSocket, Danny Coward, hat zudem neun Regeln zur generellen Verwendung des \textit{Path Mapping} festgelegt \autocite[146-159]{coward_java_2014}:
+
+\begin{description}
+	\item[Regel 1:] \textquotedblleft Der URI-Pfad eines WebSocket-Serverendpunkts wird relativ zum Kontextpfad des Webservers angegeben, auf welchem er bereitgestellt wird.\textquotedblright
+	\item[Regel 2:] \textquotedblleft Innerhalb einer Anwendung dürfen keine zwei Endpunkte den selben URI-Pfad verwenden.\textquotedblright
+	\item[Regel 3:] \textquotedblleft Die Interpretation von URI-Pfaden erfolgt unter Beachtung von Groß-/Kleinschreibung\textquotedblright
+	\item[Regel 4:] \textquotedblleft Ein eingehender Opening Handshake passt genau dann zu dem URI Template eines Serverendpunkts, wenn er die Rahmenbedingungen des Templates einhält.\textquotedblright
+	\item[Regel 5:] \textquotedblleft Es werden nur einfache URI Templates (level 1) unterstützt\footnote{Vollständige Definitionen von URI Templates sind im zugehörigen RFC einsehbar, siehe \autocite{nottingham_uri_2012}}.\textquotedblright
+	\item[Regel 6:] \textquotedblleft Eine eingehende URI trifft nur dann auf ein Template zu, wenn die Pfadparameter mit einem Wert übergeben werden.\textquotedblright
+	\item[Regel 7:] \textquotedblleft Analog zu Regel 2 dürfen keine zwei Endpunkte innerhalb einer Anwendung das gleiche URI Template verwenden.\textquotedblright
+	\item[Regel 8:] \textquotedblleft Ein Query String kann nicht zur Auswahl des zu verwendenden Endpunkts eingesetzt werden.\textquotedblright
+	\item[Regel 9:] \textquotedblleft Bei der Auswahl des zu verwendenden Endpunkts vergleicht die Java WebSocket API Pfadsegment für Pfadsegment beginnend von links. Eine exakte Übereinstimmung wird dabei der Übereinstimmung mit einem Pfadparameter vorgezogen.\textquotedblright 
+\end{description}
+
+\noindent Bei Regel 8 muss angemerkt werden, dass ein übergebener Query String bei der Auswahl des passenden Endpunkts vollständig ignoriert wird. Das folgende Beispiel sorgt für ein besseres Verständnis der Problematik, welche in Regel 9 geregelt ist:\\
+
+\noindent Endpunkt 1 unter: \texttt{/\{language\}/professional}\\
+\noindent Endpunkt 2 unter: \texttt{/java/\{skill\}}\\
+
+\noindent Hier stellt eine Anwendung zwei Endpunkte unter der Verwendung von URI Templates bereit. Trifft nun eine Anfrage an \texttt{/java/professional} ein, so kann nicht garantiert werden, welcher der beiden Endpunkte nun zuständig ist. Durch die Festlegung des Vorzugs exakter Übereinstimmung in Regel 9 wird Endpunkt 2 bereitgestellt, da \texttt{java} kein Parameter, sondern ein festgelegter Wert ist und mit der angefragten URI übereinstimmt. Zudem erfolgt diese Überprüfung für jedes Segment beginnend von links, wodurch die exakte Übereinstimmung von \texttt{professional} nicht weiter geprüft wird.
+
 \newpage
-\section{Fachliche Anforderungen}
-\subsection{Analyse des DaKo-Frameworks}
-\subsection{Anforderungen an WebSocket-Chat}
+\section{Die Chat-Anwendung}\label{sec:Dako}
+Im Rahmen des Bachelor Studiums der Wirtschaftsinformatik an der Hochschule München lernen Studierende ab dem dritten Fachsemester grundlegende und fortgeschrittene Merkmale der Datenkommunikation. Die zugehörige Modulbeschreibung der Hochschule München erklärt für diesen Kurs die Vermittlung von Prinzipien der Datenkommunikation, der Netzwerkkonzeption sowie der Entwicklung von Kommunikationsanwendungen als Ziel. Die Studierenden sollen dabei Kenntnisse über die Prinzipien der Datenkommunikation und der Netzwerkkonzeption erlangen sowie die wichtigsten Protokollmechanismen nachvollziehen können. Anschließend sollen sie in der Lage sein Kommunikationsanwendungen für konkrete Problemstellungen zu entwickeln \autocite[siehe][]{hochschule_munchen_modulhandbuch_2017}. Um die erklärten Ziele des Moduls zu erreichen liegt der Schwerpunkt auf folgenden Inhalten \autocite[aus][]{mandl_datenkommunikation_2017}:
 
-\section{Technische Anforderungen}
+\begin{itemize}
+	\singlespacing{
+	\item Spezielle Aspekte der Datenkommunikation wie verbindungsorientierte und verbindungslose Kommunikation, gesicherte Datenübertragung, Routing, Segmentierung und Fragmentierung sowie spezielle Aspekte der Netzwerkkonzeption.
+	\item Studium ausgewählter Problemstellungen realer, insbesondere von TCP/IP-basierten Datenkommunikationssystemen.
+	\item Verwendung von Transportzugriffsschnittstellen wie Sockets.
+	\item Entwicklung von Kommunikationsanwendungen auf Basis von Transportprotokollen wie TCP und UDP.
+	\item Grundbegriffe und Anwendungsbereiche von Kommunikationsarchitekturen (z.B. Schichtenmodell, Protokolle, Netzarten– und technologien).
+}
+\end{itemize}
+
+\noindent Da Studierende nach Abschluss des Moduls in der Lage sein sollen anhand definierter Anforderungen Kommunikationsanwendungen zu entwickeln, müssen sie unter der Leitung von Herrn Prof. Dr. Mandl\footnote{unter \url{https://www.wirtschaftsinformatik-muenchen.de/?page\_id=4} (letzter Zugriff am 14.01.2018)} eine Studienarbeit erstellen, in welcher eine Chat-Anwendung programmiert, evaluiert und vorgestellt werden muss. Der Schwerpunkt der Anwendung liegt auf der Entwicklung von Kommunikationsprotokollen auf Basis heutiger Transportprotokolle \autocite{mandl_datenkommunikation_2017}. Als Transportprotokoll kommt dabei das verbindungsorientierte \textit{Transmission Control Protocol} (TCP) zum Einsatz. Die verwendete Programmiersprache ist \textit{Java} der Oracle Corporation.\\
+
+\noindent Durch die Einführung des WebSocket-Protokolls sollen Webanwendungen unter möglichst geringem Einsatz von Verwaltungsdaten die Vorteile von TCP nutzen können. Dabei steht insbesondere die Möglichkeit bidirektional zu kommunizieren im Vordergrund. Die Nutzung von WebSockets im Rahmen der Studienarbeit stellt somit einen neuen Anwendungsfall dar, welcher im Rahmen dieser Bachelorarbeit geplant, umgesetzt und getestet werden soll. Dazu wird in diesem Kapitel zunächst die bestehende Anwendung analysiert, um daraus auf die Anforderungen der neuen Applikation schließen zu können. Anschließend wird deren Dokumentation zur gezielten Planung der Umsetzung eingesetzt. Die Implementierung und der Test der WebSocket-Chat-Anwendung bilden den Abschluss dieses Kapitels. 
+
+\subsection{Analyse der bestehenden Chat-Anwendung}
+Die detaillierte Prüfung der bestehenden Anwendung stellt einen wichtigen Teilaspekt in der Definition der Anforderungen an das neue Chat-Programm dar. Die Technik der Informationsgewinnung aus der Dokumentation oder Implementierung eines Altsystems wird als \textit{Systemarchäologie} bezeichnet \autocite[38]{pohl_basiswissen_2009}. Ziel dabei ist die Sicherstellung der Übernahme aller relevanten, bereits implementierten Funktionen. Sie gilt als die einzige Technik, die eine vollständige Umsetzung von Alt- in Neusysteme gewährleistet \autocite[38]{pohl_basiswissen_2009}. Diese Methode kann bei dem vorliegenden Entwicklungsprojekt gut angewendet werden, da die Dokumentation sowie die Implementierung der bestehenden Anwendung in ausreichendem Umfang und Qualität vorliegen. Des weiteren unterscheiden sich Neu- und Altsystem nur im Hinblick auf die zugrundeliegende Architektur und nicht anhand der fachlichen Funktionalität. Aus diesem Grund wird zunächst die grundlegende Struktur analysiert, die relevanten Klassen und Bibliotheken identifiziert sowie die prinzipielle Funktionsweise dargestellt.
+
+\subsubsection{Struktur des Projekts}
+Bei dem vorliegenden Projekt handelt es sich um ein \textit{Java Eclipse Projekt}, unterteilt in sechs \textit{Packages}. Ein Package (Paket) enthält dabei eine oder mehrere Klassen, die sich einen Geltungsbereich für Klassen teilen \autocite{kredel_javapackages_2006}. Ihre Bezeichnung spiegelt den Aufgabenbereich der enthaltenen Klassen wider. 
+
+\begin{description}
+	\singlespacing{
+	\item[edu.hm.dako.chat.benchmarking] Dieses Package beinhaltet Klassen und Interfaces zur grafischen Darstellung und Bereitstellung der Funktionalität für den Belastungstest der Anwendung.
+	\item[edu.hm.dako.chat.client] Hier sind alle notwendigen Klassen und Interfaces der Client-Anwendung zur grafischen Darstellung und Bereitstellung der Funktionalität enthalten.
+	\item[edu.hm.dako.chat.common] Gemeinsam genutzte Klassen, die beispielsweise Datenobjekte repräsentieren oder in denen Messwerte abgelegt werden können, sind in diesem Package enthalten. Sowohl Server als auch Client können diese Klassen verwenden. Die Übertragung der Nachrichten erfolgt durch Objekte der Klasse \texttt{ChatPDU} innerhalb dieses Packages.
+	\item[edu.hm.dako.chat.connection] In diesem Package befinden sich die Klassen, durch welche die Verbindungssteuerung sowohl auf Server- als auch auf Clientseite erfolgt. Die Klassen und Interfaces sind dabei klar auf die Verwendung von TCP als Transportprotokoll ausgelegt
+	\item[edu.hm.dako.chat.server] Hier sind alle notwendigen Klassen und Interfaces der Server-Anwendung zur grafischen Darstellung und Bereitstellung der Funktionalität enthalten.
+	\item[edu.hm.dako.chat.tcp] Diese Klassen implementieren die im \texttt{connection}-Package definierten Funktionalitäten zur Verwendung von TCP als Transportprotokoll.
+}
+\end{description}
+
+\noindent Weiterhin befinden sich im Projektverzeichnis noch zwei Konfigurationsdateien. Sie werden benötigt um die \texttt{log4j}-Bibliothek zu konfigurieren. Dabei handelt es sich um eine Erweiterung für die Ausgabe von Log-Daten auf einer Konsole oder in eine Datei.
+
+\subsubsection{Auswahl zu übernehmender Klassen }
+Die strukturellen Änderungen zwischen der bisherigen Chat-Anwendung und dem neuen WebSocket-Chat erfordern eine sorgfältige Auswahl der Klassen, die portiert werden sollen. Insbesondere Klassen zur Steuerung der Verbindung sowie zur Darstellung und Implementierung von Server- und Client-Anwendung sind zu prüfen. Dabei sollen auch nicht verwendete Programmteile des Altsystems identifiziert werden.\\
+
+\noindent Das Package \texttt{edu.hm.dako.chat.common} beinhaltet diverse Datenobjekte, die sowohl vom Client als auch vom Server verwendet werden. Die Klassen \texttt{MemoryTest} und \texttt{TestNanoTime} dienen lediglich zu Testzwecken und sind für den Einsatz in der Studienarbeit nicht relevant. Die Funktionalität aller weiteren Klassen soll auch weiterhin bestehen bleiben und muss daher übernommen werden. \\
+
+\noindent Im Package \texttt{edu.hm.dako.chat.benchmarking} sind die Funktionen zur Durchführung des Lasttests gebündelt. Die Klasse \texttt{BenchmarkingUserInterfaceSimulation} simuliert jedoch nur eine Benutzeroberfläche und wird weiterhin nicht verwendet. Die Funktionalität aller weiteren Klassen soll bestehen bleiben und muss daher übernommen werden. \\
+
+\noindent Die Packages \texttt{edu.hm.dako.chat.server} und \texttt{edu.hm.dako.chat.client} repräsentieren alle Klassen zur Darstellung und Implementierung eines Clients bzw. eines Servers. Die grafischen Oberflächen werden mittels \texttt{JavaFX} implementiert, einer Bibliothek zur Erstellung von Benutzeroberflächen durch den Einsatz von \texttt{FXML}. Dabei handelt es sich um eine auf XML-basierende Auszeichnungssprache \autocite{oracle_corporation_javafx_2014}. Da eine Webanwendung entwickelt werden soll, erfolgt die Darstellung der Client-Anwendung durch einen Webbrowser. Die aktuellen Klassen zur Darstellung werden demnach nicht weiter benötigt, wohingegen die Funktionalität aller weiteren Klassen bestehen bleiben soll und daher übernommen werden muss.\\
+
+\noindent Bei den Packages \texttt{edu.hm.dako.chat.connection} und \texttt{edu.hm.dako.chat.tcp} handelt es sich um die Klassen und Interfaces, die zur Repräsentation und Steuerung der Verbindung eingesetzt werden. Allerdings liegt deren Fokus auf der Implementierung einer Verbindung mit TCP oder dem \textit{User Datagram Protocol} (UDP). Aus diesem Package kann demnach keine Klasse weiterhin verwendet werden.\\
+
+\noindent Die Anwendung wird ergänzt durch einige externe Bibliotheken, die zusätzliche Funktionen einbringen. Die Bibliothek \texttt{netty-all-4.0.0.final} wird verwendet um die übertragenen TCP-Streams in Objekte zu konvertieren und muss daher nicht übernommen werden. Neben der bereits erwähnten Bibliothek \texttt{log4j-1.2.15} kommt lediglich \texttt{commons-math3-3.6} zur Berechnung der statistischer Werte zum Einsatz und muss daher übernommen werden. Die Verwendung aller weiteren Bibliotheken wird nicht fortgesetzt.
+
+\subsubsection{Funktionsweise}
+Die Ermittlung der abzubildenden Funktionsweise ist essentiell für die Implementierung der WebSocket-Chat-Anwendung. 
+
+\subsection{Anforderungen an WebSocket-Chat}
 \subsection{Entwurf des WebSocket-Chats}
-\subsection{Implementierung des WebSocket-Chats}
+\subsection{Implementierung und Test des WebSocket-Chats}
 
 \section{Evaluation}
 \subsection{Test-Umgebung}
+\subsection{Probleme}
 \subsection{Leistungsanalyse WebSocket-Chat}
 
 \section{Zusammenfassung und Ausblick}
