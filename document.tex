@@ -27,6 +27,7 @@
 \usepackage[hidelinks]{hyperref}
 \usepackage[framemethod=tikz]{mdframed}
 \usepackage{chngcntr}
+\usepackage{caption}
 
 \definecolor{lightgray}{rgb}{.9,.9,.9}
 \definecolor{darkgray}{rgb}{.4,.4,.4}
@@ -998,9 +999,52 @@ Die strukturellen Änderungen zwischen der bisherigen Chat-Anwendung und dem neu
 \noindent Die Anwendung wird ergänzt durch einige externe Bibliotheken, die zusätzliche Funktionen einbringen. Die Bibliothek \texttt{netty-all-4.0.0.final} wird verwendet um die übertragenen TCP-Streams in Objekte zu konvertieren und muss daher nicht übernommen werden. Neben der bereits erwähnten Bibliothek \texttt{log4j-1.2.15} kommt lediglich \texttt{commons-math3-3.6} zur Berechnung der statistischer Werte zum Einsatz und muss daher übernommen werden. Die Verwendung aller weiteren Bibliotheken wird nicht fortgesetzt.
 
 \subsubsection{Funktionsweise}
-Die Ermittlung der abzubildenden Funktionsweise ist essentiell für die Implementierung der WebSocket-Chat-Anwendung. Die obligatorische Übernahme der daraus abgeleiteten Anforderungen gewährleistet die bestehende Funktionalität weiterhin. Die Chat-Anwendung besteht grundlegend aus drei Teilbereichen. Der Serverteil ermöglicht die Auswahl zwischen zwei unterschiedlichen Implementierungsvarianten: \texttt{Simple} und \texttt{Advanced}. Zudem kann der Port eingestellt werden, auf welchem der Server lauscht. Des weiteren können Sende- und Empfangspuffergrößen in Byte angegeben werden. Der Teil des Clients besteht aus einer Anmeldemaske, in welcher der Benutzer seinen Namen sowie die IP-Adresse und den Port des Zielservers eintragen kann. Auch hier muss ein Implementierungstyp angegeben werden. Konnte die Verbindung zu dem Server hergestellt werden und stimmen die Implementierungstypen überein, so wechselt die Darstellung in die Chat-Ansicht. Diese besteht aus einer Liste der angemeldeten Benutzer sowie einem Bereich, in welchem die Chat-Nachrichten dargestellt werden. Zudem befinden sich dort noch Schaltflächen zum Senden von Nachrichten und zum Abmelden. 
+Die Ermittlung der abzubildenden Funktionsweise ist essentiell für die Implementierung der WebSocket-Chat-Anwendung. Die obligatorische Übernahme der daraus abgeleiteten Anforderungen gewährleistet die bestehende Funktionalität weiterhin. Die Chat-Anwendung besteht grundlegend aus drei Teilbereichen. Der Serverteil ermöglicht die Auswahl zwischen zwei unterschiedlichen Implementierungsvarianten: \texttt{Simple} und \texttt{Advanced}. Zudem kann der Port eingestellt werden, auf welchem der Server auf neue Anfragen lauscht. Des weiteren können Sende- und Empfangspuffergrößen in Byte angegeben werden. Der Teil des Clients besteht aus einer Anmeldemaske, in welcher der Benutzer seinen Namen sowie die IP-Adresse und den Port des Zielservers eintragen kann. Auch hier muss ein Implementierungstyp angegeben werden. Konnte die Verbindung zu dem Server hergestellt werden und stimmen die Implementierungstypen überein, so wechselt die Darstellung in die Chat-Ansicht. Diese besteht aus einer Liste der angemeldeten Benutzer sowie einem Bereich, in welchem die Chat-Nachrichten dargestellt werden. Zudem befinden sich dort noch Schaltflächen zum Senden von Nachrichten und zum Abmelden. Der dritte Teilbereich stellt die Funktionalität eines Lasttests bereit. Die Benutzeroberfläche dieses Benchmark-Clients bietet eine Vielzahl von Konfigurationsmöglichkeiten. Weiterhin finden sich dort diverse Felder für Laufzeitdaten und Messergebnisse. Der Benchmark-Client kann mit den vorhandenen Schaltflächen gestartet, abgebrochen, neugestartet und vollständig beendet werden. Eine detaillierte Ansicht aller verfügbaren Optionen zeigt die Abbildung im Anhang.\\
+
+\noindent Kern der Anwendung ist die Klasse \texttt{ChatPDU}. Eine \textit{Protocol Data Unit} (PDU) repräsentiert die Nachrichten, die zwischen Server und Client ausgetauscht werden. Dabei enthalten sie Statusinformationen, durch welche der Zustand der Verbindung verändert werden kann. 
+\medskip
+\begin{figure}[ht] \label{fig:dakoZustand}
+	\begin{center}
+		\includegraphics[scale=1]{img/DaKoZustand.pdf}
+		\caption{Zustände in der Chat-Anwendung}
+	\end{center}
+\end{figure}
+
+\noindent Durch den Aufruf der \texttt{login()}-Methode wechselt der Client zunächst in den Zustand \texttt{REGISTERING}. Bestätigt der Server die korrekte Anmeldung, so wechselt der Client in den Zustand \texttt{REGISTERED}. Das Senden von Nachrichten erfolgt mittels \texttt{tell()} und ändert dabei nicht den Zustand des Clients. Die Abmeldung wird durch die Methode \texttt{logout()} initiiert, woraufhin sich der Client im Zustand \texttt{UNREGISTERING} befindet. Wird die Abmeldung vom Server bestätigt bzw. erreicht die Bestätigung den Client nicht innerhalb einer festgelegten Zeitspanne, so wird angenommen, dass die Verbindung geschlossen werden kann und der Client wechselt in den Zustand \texttt{UNREGISTERED}.\\
+
+\noindent Jeder Methodenaufruf generiert dabei eine \texttt{ChatPDU} mit einer Anfrage der zugehörigen Aktion. Beispielsweise wird bei der Anmeldung der PDU-Typ \texttt{LOGIN\_REQUEST} und beim Versand einer Nachricht der Typ \texttt{MESSAGE\_REQUEST} verwendet. Die Verarbeitung der Anfrage ist abhängig von der Implementierung des Servers. Die einfache Implementierung (\texttt{Simple}) benachrichtigt alle angemeldeten Clients über das eingetretene Ereignis und antwortet dem anfragenden Client umgehend. Die komplexe Implementierung (\texttt{Advanced}) sieht vor, dass alle versendeten Events zunächst bestätigt werden müssen, bevor die Antwort an den initiierenden Client versendet wird. Der Ablauf der komplexen Implementierung ist beispielhaft für den Anmeldevorgang in Abbildung \ref{fig:dakoLogin} dargestellt.
+\medskip
+\begin{figure}[ht] 
+	\begin{center}
+		\includegraphics[scale=1]{img/DaKoLogin.pdf}
+		\caption{Ablauf des Login-Vorgangs (AdvancedChat)}
+		\label{fig:dakoLogin}
+	\end{center}
+\end{figure}
+
+\noindent Neben den Anfragen, die als \texttt{REQUESTS} versendet werden, können die PDUs des Chat-Protokolls von den Typen \texttt{EVENT} für neue Ereignisse, \texttt{EVENT\_CONFIRM} zur Bestätigung eines Ereignisses und \texttt{RESPONSE} zur Bestätigung der Anfrage sein. Anfragen und Ereignisbestätigungen werden ausschließlich von einem Client verwendet, wohingegen ein Server lediglich über neue Ereignisse informiert und Anfragen bestätigt. Da die Protokollmechanismen genutzt werden sollen, um die \glqq Programmierung von Kommunikationsanwendungen [...] zu erlernen und Erfahrungen mit Transportprotokollen zu sammeln\grqq {} \autocite[vgl.][2]{mandl_aufgabenstellung_2017}, müssen diese im WebSocket-Chat unverändert abgebildet werden.\\
+
+\noindent Das Stellen von Anfragen sowie deren Bearbeitung erfolgt nebenläufig durch die Verwendung von \textit{Threads}. Dabei handelt es sich um leichtgewichtige Prozesse innerhalb eines Prozesses, die sich dessen Ressourcen teilen. Da der gemeinsame Zugriff auf die unterliegenden Ressourcen zu unvorhergesehenen Ergebnissen (\textit{Race Conditions}) führen kann, müssen die Threads mittels geeigneter Mechanismen synchronisiert werden. Die Chat-Anwendung verwendet drei Threads pro Verbindung zwischen Server und Client. Der Server stellt für jeden neuen Client einen dedizierten Thread zur Bearbeitung der Anfragen zur Verfügung. Der Client verfügt über zwei Threads, wobei einer für die Bearbeitung der Benutzerinteraktionen zuständig ist und der andere die Nachrichten des Servers annimmt und bearbeitet. Sowohl die Client-, als auch die Serveranwendung werden als eigenständig Prozesse ausgeführt und können unabhängig voneinander auf verschiedene Hosts verteilt werden. Der WebSocket-Chat soll die Anwendungsteile ebenfalls trennen, wobei die Clientanwendung im Browser und die Serveranwendung auf einem Webserver ausgeführt wird. Der Teil des Clients wird bei einer Webanwendung ebenfalls durch den Webserver ausgeliefert. Durch die Verwendung der Java WebSocket-API wird die Verwaltung der Threads von der spezifischen Implementierung übernommen und kann daher nur eingeschränkt angepasst werden. \\
+
+\noindent Die Übertragung der Protokollnachrichten erfolgt synchron durch die kontinuierliche Übertragung von Objektströmen. Eine zu übermittelnde \texttt{ChatPDU} wird zunächst serialisiert und anschließend in den Puffer des TCP-Sockets übertragen. Für die Serialisierung implementiert die Klasse das Interface \texttt{Serializable}. Überschreitet die Größe der Nachricht den reservierten Speicherplatz des Puffers nicht, so kann der aktive Thread im Anschluss weitere Aufgaben bearbeiten. Im Gegensatz zum nachrichten-basierten WebSocket-Protokoll erfolgt die Übertragung mittels TCP-Sockets \textit{stream-basiert}. Dabei werden die Daten in einem kontinuierlichen Fluss übertragen, dessen Ende vorab nicht ersichtlich ist. Aufgrund der Unterschiede im Aufbau der Protokolle sind nicht alle Eigenschaften der Übertragung von Protokollnachrichten der bestehenden Chat-Anwendung abbildbar. Da jedoch im WebSocket-Chat ebenfalls \texttt{ChatPDUs} übertragen werden sollen, müssen diese entsprechend vor der Übertragung transfomiert werden.
 
 \subsection{Anforderungen an WebSocket-Chat}
+Die gewonnen Erkenntnisse aus der Analyse der bestehenden Chat-Anwendung sollen im Folgenden dazu verwendet werden, die Anforderungen an den WebSocket-Chat zu spezifieren. Eine Anforderungsspezifikation entspricht einer systematisch dargestellten Sammlung von Anforderungen an ein System \autocite[43]{pohl_basiswissen_2009}. Eine Anforderung ist im IEEE Standard 620.16-1990 definiert als \glqq Eine Bedingung oder Fähigkeit, die ein System oder eine Komponente erfüllen oder besitzen muss, um einen Vertrag, einen Standard, eine Spezifikation oder anderweitig formal vorgeschriebene Dokumente zu erfüllen.\grqq{} Dabei wird zwischen funktionalen und nicht-funktionalen Anforderungen unterschieden. Funktionale Anforderungen beziehen sich auf ein erwartetes Ergebnis des Verhaltens einer bereitgestellten Funktion des Systems wohingegen nicht-funktionale Anforderungen an Qualitätsmerkmale des Systems gestellt werden \autocite[16]{pohl_basiswissen_2009}. Diese Qualitätsanforderungen können beispielsweise an die Geschwindigkeit oder Verfügbarkeit eines Systems gestellt werden. Die ermittelten Anforderungen dienen als Basis für den Entwurf des Systems sowie die anschließende Implementierung. Des weiteren werden aus ihnen Testfälle abgeleitet, um die Einhaltung der Systemanforderungen zu überprüfen. 
+
+\subsubsection{Funktionale Anforderungen}
+Durch die Analyse der Funktionen der bestehenden Chat-Anwendung wurde eine Vielzahl von Anforderungen an den WebSocket-Chat ermittelt. Im Folgenden werden diese zusammengefasst und in die Bereiche \textit{Struktur} sowie \textit{Kommunikation und Zustände} eingeteilt.
+
+\subsubsection*{Struktur}
+Die Chat-Anwendung ist aufgeteilt in Server-, Client- und Benchmarking-Teil. Jeder Teil ist in einem eigenen Prozess ausführbar und kann auf verschiedenen Hostsystemen lokalisiert sein. Der WebSocket-Chat sollte diese Aufteilung weiterhin beibehalten, kann jedoch die Server- und Clientanwendung in einer Einheit bereitstellen. Der Benchmark-Client muss weiterhin als eigenständige Einheit verfügbar sein, um Leistungsmessungen in verschiedenen Szenarien zu ermöglichen. Die Serveranwendung soll in Java 8 durch die Java API\texttrademark for WebSocket realisiert werden wohingegen die Clientanwendung in TypeScript unter Verwendung des Front-End-Webapplikationsframeworks Angular 4 entwickelt wird. Der Benchmark-Client soll als unabhängige Konsolenanwendung in Java 8 implementiert werden und die bisherigen Auswertungsmöglichkeiten bereitstellen.\\
+
+\noindent Die Kommunikation zwischen den Anwendungsteilen muss auf dem WebSocket-Protokoll basieren. Dabei müssen die in Kapitel \ref{sec:WebSocketProtokoll} und Kapitel \ref{sec:WebSocketAPI} beschriebenen Vorgehensweisen sowie Standards eingehalten werden. Eine WebSocket-Verbindung zwischen Server und Client muss immer über den HTTP Handshake hergestellt werden. Die Leistungsmessungen können entsprechend der Spezifikation ohne diesen durchgeführt werden, da der Benchmark-Client nicht innerhalb eines Browsers ausgeführt wird. 
+
+\subsubsection*{Kommunikation und Zustände}
+
+Funktionen des alten Systems s.o., Zustände des alten Systems inkl. Änderungen,  Login vor Chat, Fehler bei doppeltem Namen, Verwenden von ChatPDUs
+
+\subsubsection{Nicht-funktionale Anforderungen}
+Modernes UI responsive, singlepage, Fehlertolerant, nicht blockieren nach Senden der Nachricht, 
 \subsection{Entwurf des WebSocket-Chats}
 \subsection{Implementierung und Test des WebSocket-Chats}
 
@@ -1022,5 +1066,13 @@ Die Ermittlung der abzubildenden Funktionsweise ist essentiell für die Implemen
 \listoftables
 \newpage
 \lstlistoflistings
+\newpage
+\section*{Anhang}
+\begin{figure}[ht] \label{fig:dakoBenchClientUI}
+	\begin{center}
+		\includegraphics[scale=0.17]{img/benchClientUI.jpg}
+		\caption[]{Benutzeroberfläche des Benchmark-Clients}
+	\end{center}
+\end{figure}
 
 \end{document}
