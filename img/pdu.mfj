@@ -1,0 +1,745 @@
+{
+	"_type": "UMLClass",
+	"_id": "AAAAAAFhMuLwbeX2TXU=",
+	"_parent": {
+		"$ref": "AAAAAAFF+qBWK6M3Z8Y="
+	},
+	"name": "ChatPDU",
+	"visibility": "public",
+	"attributes": [
+		{
+			"_type": "UMLAttribute",
+			"_id": "AAAAAAFhMuN4aOamPow=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "pduType",
+			"visibility": "private",
+			"isStatic": false,
+			"isLeaf": false,
+			"type": "PduType",
+			"isReadOnly": false,
+			"isOrdered": false,
+			"isUnique": false,
+			"isDerived": false,
+			"aggregation": "none",
+			"isID": false
+		},
+		{
+			"_type": "UMLAttribute",
+			"_id": "AAAAAAFhMuOesuatBB4=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "userName",
+			"visibility": "private",
+			"isStatic": false,
+			"isLeaf": false,
+			"type": "String",
+			"isReadOnly": false,
+			"isOrdered": false,
+			"isUnique": false,
+			"isDerived": false,
+			"aggregation": "none",
+			"isID": false
+		},
+		{
+			"_type": "UMLAttribute",
+			"_id": "AAAAAAFhMuQNMolkNBA=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "eventUserName",
+			"visibility": "private",
+			"isStatic": false,
+			"isLeaf": false,
+			"type": "String",
+			"isReadOnly": false,
+			"isOrdered": false,
+			"isUnique": false,
+			"isDerived": false,
+			"aggregation": "none",
+			"isID": false
+		},
+		{
+			"_type": "UMLAttribute",
+			"_id": "AAAAAAFhMuRw4+a7pys=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "clientThreadName",
+			"visibility": "private",
+			"isStatic": false,
+			"isLeaf": false,
+			"type": "String",
+			"isReadOnly": false,
+			"isOrdered": false,
+			"isUnique": false,
+			"isDerived": false,
+			"aggregation": "none",
+			"isID": false
+		},
+		{
+			"_type": "UMLAttribute",
+			"_id": "AAAAAAFhMuR4uObBkDU=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "serverThreadName",
+			"visibility": "private",
+			"isStatic": false,
+			"isLeaf": false,
+			"type": "String",
+			"isReadOnly": false,
+			"isOrdered": false,
+			"isUnique": false,
+			"isDerived": false,
+			"aggregation": "none",
+			"isID": false
+		},
+		{
+			"_type": "UMLAttribute",
+			"_id": "AAAAAAFhMuR8WebHIwY=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "sequenceNumber",
+			"visibility": "private",
+			"isStatic": false,
+			"isLeaf": false,
+			"type": "long",
+			"isReadOnly": false,
+			"isOrdered": false,
+			"isUnique": false,
+			"isDerived": false,
+			"aggregation": "none",
+			"isID": false
+		},
+		{
+			"_type": "UMLAttribute",
+			"_id": "AAAAAAFhMuSAmubNPUI=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "message",
+			"visibility": "private",
+			"isStatic": false,
+			"isLeaf": false,
+			"type": "String",
+			"isReadOnly": false,
+			"isOrdered": false,
+			"isUnique": false,
+			"isDerived": false,
+			"aggregation": "none",
+			"isID": false
+		},
+		{
+			"_type": "UMLAttribute",
+			"_id": "AAAAAAFhMuSDtObTLVg=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "clients",
+			"visibility": "private",
+			"isStatic": false,
+			"isLeaf": false,
+			"type": "Vector<String>",
+			"isReadOnly": false,
+			"isOrdered": false,
+			"isUnique": false,
+			"isDerived": false,
+			"aggregation": "none",
+			"isID": false
+		},
+		{
+			"_type": "UMLAttribute",
+			"_id": "AAAAAAFhMuZyl+bm+Y4=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "serverTime",
+			"visibility": "private",
+			"isStatic": false,
+			"isLeaf": false,
+			"type": "long",
+			"isReadOnly": false,
+			"isOrdered": false,
+			"isUnique": false,
+			"isDerived": false,
+			"aggregation": "none",
+			"isID": false
+		},
+		{
+			"_type": "UMLAttribute",
+			"_id": "AAAAAAFhMuZ2U+bs2y4=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "clientStatus",
+			"visibility": "private",
+			"isStatic": false,
+			"isLeaf": false,
+			"type": "ClientConversationStatus",
+			"isReadOnly": false,
+			"isOrdered": false,
+			"isUnique": false,
+			"isDerived": false,
+			"aggregation": "none",
+			"isID": false
+		},
+		{
+			"_type": "UMLAttribute",
+			"_id": "AAAAAAFhMuZ5XebyQjU=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "errorCode",
+			"visibility": "private",
+			"isStatic": false,
+			"isLeaf": false,
+			"type": "int",
+			"isReadOnly": false,
+			"isOrdered": false,
+			"isUnique": false,
+			"isDerived": false,
+			"aggregation": "none",
+			"isID": false
+		},
+		{
+			"_type": "UMLAttribute",
+			"_id": "AAAAAAFhMuZ7jeb4rR0=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "numberOfReceivedChatMessages",
+			"visibility": "private",
+			"isStatic": false,
+			"isLeaf": false,
+			"type": "long",
+			"isReadOnly": false,
+			"isOrdered": false,
+			"isUnique": false,
+			"isDerived": false,
+			"aggregation": "none",
+			"isID": false
+		},
+		{
+			"_type": "UMLAttribute",
+			"_id": "AAAAAAFhMuZ/Feb+BrY=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "numberOfSentEvents",
+			"visibility": "private",
+			"isStatic": false,
+			"isLeaf": false,
+			"type": "long",
+			"isReadOnly": false,
+			"isOrdered": false,
+			"isUnique": false,
+			"isDerived": false,
+			"aggregation": "none",
+			"isID": false
+		},
+		{
+			"_type": "UMLAttribute",
+			"_id": "AAAAAAFhMuia3ecWC8Q=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "numberOfReceivedConfirms",
+			"visibility": "private",
+			"isStatic": false,
+			"isLeaf": false,
+			"type": "long",
+			"isReadOnly": false,
+			"isOrdered": false,
+			"isUnique": false,
+			"isDerived": false,
+			"aggregation": "none",
+			"isID": false
+		},
+		{
+			"_type": "UMLAttribute",
+			"_id": "AAAAAAFhMuifLOcch0Y=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "numberOfLostConfirms",
+			"visibility": "private",
+			"isStatic": false,
+			"isLeaf": false,
+			"type": "long",
+			"isReadOnly": false,
+			"isOrdered": false,
+			"isUnique": false,
+			"isDerived": false,
+			"aggregation": "none",
+			"isID": false
+		},
+		{
+			"_type": "UMLAttribute",
+			"_id": "AAAAAAFhMujX/+ck+4M=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "numberOfRetries",
+			"visibility": "private",
+			"isStatic": false,
+			"isLeaf": false,
+			"type": "long",
+			"isReadOnly": false,
+			"isOrdered": false,
+			"isUnique": false,
+			"isDerived": false,
+			"aggregation": "none",
+			"isID": false
+		}
+	],
+	"operations": [
+		{
+			"_type": "UMLOperation",
+			"_id": "AAAAAAFhMuk8XucsZxc=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "ChatPDU",
+			"visibility": "public",
+			"isStatic": false,
+			"isLeaf": false,
+			"concurrency": "sequential",
+			"isQuery": false,
+			"isAbstract": false
+		},
+		{
+			"_type": "UMLOperation",
+			"_id": "AAAAAAFhMuluU+czlpU=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "ChatPDU",
+			"visibility": "public",
+			"isStatic": false,
+			"isLeaf": false,
+			"parameters": [
+				{
+					"_type": "UMLParameter",
+					"_id": "AAAAAAFhMuu8mOdmZkg=",
+					"_parent": {
+						"$ref": "AAAAAAFhMuluU+czlpU="
+					},
+					"name": "type",
+					"visibility": "public",
+					"isStatic": false,
+					"isLeaf": false,
+					"type": "PduType",
+					"isReadOnly": false,
+					"isOrdered": false,
+					"isUnique": false,
+					"direction": "in"
+				},
+				{
+					"_type": "UMLParameter",
+					"_id": "AAAAAAFhMuvJhedpAqA=",
+					"_parent": {
+						"$ref": "AAAAAAFhMuluU+czlpU="
+					},
+					"name": "clients",
+					"visibility": "public",
+					"isStatic": false,
+					"isLeaf": false,
+					"type": "Vector<String>",
+					"isReadOnly": false,
+					"isOrdered": false,
+					"isUnique": false,
+					"direction": "in"
+				}
+			],
+			"concurrency": "sequential",
+			"isQuery": false,
+			"isAbstract": false
+		},
+		{
+			"_type": "UMLOperation",
+			"_id": "AAAAAAFhMulzFOc5u9A=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "ChatPDU",
+			"visibility": "public",
+			"isStatic": false,
+			"isLeaf": false,
+			"parameters": [
+				{
+					"_type": "UMLParameter",
+					"_id": "AAAAAAFhMu1VeOdv1qo=",
+					"_parent": {
+						"$ref": "AAAAAAFhMulzFOc5u9A="
+					},
+					"name": "type",
+					"visibility": "public",
+					"isStatic": false,
+					"isLeaf": false,
+					"type": "PduType",
+					"isReadOnly": false,
+					"isOrdered": false,
+					"isUnique": false,
+					"direction": "in"
+				},
+				{
+					"_type": "UMLParameter",
+					"_id": "AAAAAAFhMu1Veedwhoo=",
+					"_parent": {
+						"$ref": "AAAAAAFhMulzFOc5u9A="
+					},
+					"name": "message",
+					"visibility": "public",
+					"isStatic": false,
+					"isLeaf": false,
+					"type": "String",
+					"isReadOnly": false,
+					"isOrdered": false,
+					"isUnique": false,
+					"direction": "in"
+				}
+			],
+			"concurrency": "sequential",
+			"isQuery": false,
+			"isAbstract": false
+		},
+		{
+			"_type": "UMLOperation",
+			"_id": "AAAAAAFhMul23uc/mvY=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "createLogoutEventPdu",
+			"visibility": "public",
+			"isStatic": true,
+			"isLeaf": false,
+			"parameters": [
+				{
+					"_type": "UMLParameter",
+					"_id": "AAAAAAFhMv7+u+hC+wU=",
+					"_parent": {
+						"$ref": "AAAAAAFhMul23uc/mvY="
+					},
+					"visibility": "public",
+					"isStatic": false,
+					"isLeaf": false,
+					"type": {
+						"$ref": "AAAAAAFhMuLwbeX2TXU="
+					},
+					"isReadOnly": false,
+					"isOrdered": false,
+					"isUnique": false,
+					"direction": "return"
+				}
+			],
+			"concurrency": "sequential",
+			"isQuery": false,
+			"isAbstract": false
+		},
+		{
+			"_type": "UMLOperation",
+			"_id": "AAAAAAFhMvFIuYllqMg=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "createLoginEventPdu",
+			"visibility": "public",
+			"isStatic": true,
+			"isLeaf": false,
+			"parameters": [
+				{
+					"_type": "UMLParameter",
+					"_id": "AAAAAAFhMv86G+hFxpk=",
+					"_parent": {
+						"$ref": "AAAAAAFhMvFIuYllqMg="
+					},
+					"visibility": "public",
+					"isStatic": false,
+					"isLeaf": false,
+					"type": {
+						"$ref": "AAAAAAFhMuLwbeX2TXU="
+					},
+					"isReadOnly": false,
+					"isOrdered": false,
+					"isUnique": false,
+					"direction": "return"
+				}
+			],
+			"concurrency": "sequential",
+			"isQuery": false,
+			"isAbstract": false
+		},
+		{
+			"_type": "UMLOperation",
+			"_id": "AAAAAAFhMvFqGYlpXR8=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "createLoginResponsePdu",
+			"visibility": "public",
+			"isStatic": true,
+			"isLeaf": false,
+			"parameters": [
+				{
+					"_type": "UMLParameter",
+					"_id": "AAAAAAFhMv9B5uhIkOI=",
+					"_parent": {
+						"$ref": "AAAAAAFhMvFqGYlpXR8="
+					},
+					"visibility": "public",
+					"isStatic": false,
+					"isLeaf": false,
+					"type": {
+						"$ref": "AAAAAAFhMuLwbeX2TXU="
+					},
+					"isReadOnly": false,
+					"isOrdered": false,
+					"isUnique": false,
+					"direction": "return"
+				}
+			],
+			"concurrency": "sequential",
+			"isQuery": false,
+			"isAbstract": false
+		},
+		{
+			"_type": "UMLOperation",
+			"_id": "AAAAAAFhMvJ2ioltzlU=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "createChatMessageEventPdu",
+			"visibility": "public",
+			"isStatic": true,
+			"isLeaf": false,
+			"parameters": [
+				{
+					"_type": "UMLParameter",
+					"_id": "AAAAAAFhMv9LoOhLy7M=",
+					"_parent": {
+						"$ref": "AAAAAAFhMvJ2ioltzlU="
+					},
+					"visibility": "public",
+					"isStatic": false,
+					"isLeaf": false,
+					"type": {
+						"$ref": "AAAAAAFhMuLwbeX2TXU="
+					},
+					"isReadOnly": false,
+					"isOrdered": false,
+					"isUnique": false,
+					"direction": "return"
+				}
+			],
+			"concurrency": "sequential",
+			"isQuery": false,
+			"isAbstract": false
+		},
+		{
+			"_type": "UMLOperation",
+			"_id": "AAAAAAFhMvMvyufAIpU=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "createLogoutResponsePdu",
+			"visibility": "public",
+			"isStatic": true,
+			"isLeaf": false,
+			"parameters": [
+				{
+					"_type": "UMLParameter",
+					"_id": "AAAAAAFhMv9V8ehOEZ8=",
+					"_parent": {
+						"$ref": "AAAAAAFhMvMvyufAIpU="
+					},
+					"visibility": "public",
+					"isStatic": false,
+					"isLeaf": false,
+					"type": {
+						"$ref": "AAAAAAFhMuLwbeX2TXU="
+					},
+					"isReadOnly": false,
+					"isOrdered": false,
+					"isUnique": false,
+					"direction": "return"
+				}
+			],
+			"concurrency": "sequential",
+			"isQuery": false,
+			"isAbstract": false
+		},
+		{
+			"_type": "UMLOperation",
+			"_id": "AAAAAAFhMvuQdIlxzf4=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "createChatMessageResponsePdu",
+			"visibility": "public",
+			"isStatic": true,
+			"isLeaf": false,
+			"parameters": [
+				{
+					"_type": "UMLParameter",
+					"_id": "AAAAAAFhMv9eiehRlmw=",
+					"_parent": {
+						"$ref": "AAAAAAFhMvuQdIlxzf4="
+					},
+					"visibility": "public",
+					"isStatic": false,
+					"isLeaf": false,
+					"type": {
+						"$ref": "AAAAAAFhMuLwbeX2TXU="
+					},
+					"isReadOnly": false,
+					"isOrdered": false,
+					"isUnique": false,
+					"direction": "return"
+				}
+			],
+			"concurrency": "sequential",
+			"isQuery": false,
+			"isAbstract": false
+		},
+		{
+			"_type": "UMLOperation",
+			"_id": "AAAAAAFhMv2Lruggto4=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "createLoginErrorResponsePdu",
+			"visibility": "public",
+			"isStatic": true,
+			"isLeaf": false,
+			"parameters": [
+				{
+					"_type": "UMLParameter",
+					"_id": "AAAAAAFhMv9noOhU8Sc=",
+					"_parent": {
+						"$ref": "AAAAAAFhMv2Lruggto4="
+					},
+					"visibility": "public",
+					"isStatic": false,
+					"isLeaf": false,
+					"type": {
+						"$ref": "AAAAAAFhMuLwbeX2TXU="
+					},
+					"isReadOnly": false,
+					"isOrdered": false,
+					"isUnique": false,
+					"direction": "return"
+				}
+			],
+			"concurrency": "sequential",
+			"isQuery": false,
+			"isAbstract": false
+		},
+		{
+			"_type": "UMLOperation",
+			"_id": "AAAAAAFhMv4os+goQBs=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "createLoginEventConfirm",
+			"visibility": "public",
+			"isStatic": true,
+			"isLeaf": false,
+			"parameters": [
+				{
+					"_type": "UMLParameter",
+					"_id": "AAAAAAFhMv9xdOhX+Vs=",
+					"_parent": {
+						"$ref": "AAAAAAFhMv4os+goQBs="
+					},
+					"visibility": "public",
+					"isStatic": false,
+					"isLeaf": false,
+					"type": {
+						"$ref": "AAAAAAFhMuLwbeX2TXU="
+					},
+					"isReadOnly": false,
+					"isOrdered": false,
+					"isUnique": false,
+					"direction": "return"
+				}
+			],
+			"concurrency": "sequential",
+			"isQuery": false,
+			"isAbstract": false
+		},
+		{
+			"_type": "UMLOperation",
+			"_id": "AAAAAAFhMv5G7OgvKgg=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "createLogoutEventConfirm",
+			"visibility": "public",
+			"isStatic": true,
+			"isLeaf": false,
+			"parameters": [
+				{
+					"_type": "UMLParameter",
+					"_id": "AAAAAAFhMv96XehaD9E=",
+					"_parent": {
+						"$ref": "AAAAAAFhMv5G7OgvKgg="
+					},
+					"visibility": "public",
+					"isStatic": false,
+					"isLeaf": false,
+					"type": {
+						"$ref": "AAAAAAFhMuLwbeX2TXU="
+					},
+					"isReadOnly": false,
+					"isOrdered": false,
+					"isUnique": false,
+					"direction": "return"
+				}
+			],
+			"concurrency": "sequential",
+			"isQuery": false,
+			"isAbstract": false
+		},
+		{
+			"_type": "UMLOperation",
+			"_id": "AAAAAAFhMv5Laeg1CmU=",
+			"_parent": {
+				"$ref": "AAAAAAFhMuLwbeX2TXU="
+			},
+			"name": "createChatMessageEventConfirm",
+			"visibility": "public",
+			"isStatic": true,
+			"isLeaf": false,
+			"parameters": [
+				{
+					"_type": "UMLParameter",
+					"_id": "AAAAAAFhMv+EBehdDvQ=",
+					"_parent": {
+						"$ref": "AAAAAAFhMv5Laeg1CmU="
+					},
+					"visibility": "public",
+					"isStatic": false,
+					"isLeaf": false,
+					"type": {
+						"$ref": "AAAAAAFhMuLwbeX2TXU="
+					},
+					"isReadOnly": false,
+					"isOrdered": false,
+					"isUnique": false,
+					"direction": "return"
+				}
+			],
+			"concurrency": "sequential",
+			"isQuery": false,
+			"isAbstract": false
+		}
+	],
+	"isAbstract": false,
+	"isFinalSpecialization": false,
+	"isLeaf": false,
+	"isActive": false
+}

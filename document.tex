@@ -28,6 +28,7 @@
 \usepackage[framemethod=tikz]{mdframed}
 \usepackage{chngcntr}
 \usepackage{caption}
+\usepackage{pdflscape}
 
 \definecolor{lightgray}{rgb}{.9,.9,.9}
 \definecolor{darkgray}{rgb}{.4,.4,.4}
@@ -94,6 +95,7 @@
                   
 \numberwithin{equation}{section} 
 \counterwithin{figure}{section}
+
 % einige Abkuerzungen
 \newcommand{\C}{\mathbb{C}} % komplexe
 \newcommand{\K}{\mathbb{K}} % komplexe
@@ -111,7 +113,7 @@
   % Keine Seitenzahlen im Vorspann
   \pagestyle{empty}
   \renewcommand{\thelstlisting}{\arabic{section}.\arabic{lstlisting}}
- 
+ \counterwithin{lstlisting}{section}
   % Titelblatt der Arbeit
 \begin{titlepage}
 
@@ -1030,7 +1032,7 @@ Die Ermittlung der abzubildenden Funktionsweise ist essentiell für die Implemen
 \noindent Die Übertragung der Protokollnachrichten erfolgt synchron durch die kontinuierliche Übertragung von Objektströmen. Eine zu übermittelnde \texttt{ChatPDU} wird zunächst serialisiert und anschließend in den Puffer des TCP-Sockets übertragen. Für die Serialisierung implementiert die Klasse das Interface \texttt{Serializable}. Überschreitet die Größe der Nachricht den reservierten Speicherplatz des Puffers nicht, so kann der aktive Thread im Anschluss weitere Aufgaben bearbeiten. Im Gegensatz zum nachrichten-basierten WebSocket-Protokoll erfolgt die Übertragung mittels TCP-Sockets \textit{stream-basiert}. Dabei werden die Daten in einem kontinuierlichen Fluss übertragen, dessen Ende vorab nicht ersichtlich ist. Aufgrund der Unterschiede im Aufbau der Protokolle sind nicht alle Eigenschaften der Übertragung von Protokollnachrichten der bestehenden Chat-Anwendung abbildbar. Da jedoch im WebSocket-Chat ebenfalls \texttt{ChatPDUs} übertragen werden sollen, müssen diese entsprechend vor der Übertragung transfomiert werden.
 
 \subsection{Anforderungen an WebSocket-Chat}
-Die gewonnen Erkenntnisse aus der Analyse der bestehenden Chat-Anwendung sollen im Folgenden dazu verwendet werden, die Anforderungen an den WebSocket-Chat zu spezifieren. Eine Anforderungsspezifikation entspricht einer systematisch dargestellten Sammlung von Anforderungen an ein System \autocite[43]{pohl_basiswissen_2009}. Eine Anforderung ist im IEEE Standard 620.16-1990 definiert als \glqq Eine Bedingung oder Fähigkeit, die ein System oder eine Komponente erfüllen oder besitzen muss, um einen Vertrag, einen Standard, eine Spezifikation oder anderweitig formal vorgeschriebene Dokumente zu erfüllen.\grqq{} Dabei wird zwischen funktionalen und nicht-funktionalen Anforderungen unterschieden. Funktionale Anforderungen beziehen sich auf ein erwartetes Ergebnis des Verhaltens einer bereitgestellten Funktion des Systems wohingegen nicht-funktionale Anforderungen an Qualitätsmerkmale des Systems gestellt werden \autocite[16]{pohl_basiswissen_2009}. Diese Qualitätsanforderungen können beispielsweise die Geschwindigkeit oder Verfügbarkeit eines Systems betreffen. Die ermittelten Anforderungen dienen als Basis für den Entwurf des Systems sowie die anschließende Implementierung. Des weiteren werden aus ihnen Testfälle abgeleitet, um die Einhaltung der Systemanforderungen zu überprüfen. 
+Die gewonnenen Erkenntnisse aus der Analyse der bestehenden Chat-Anwendung sollen im Folgenden dazu verwendet werden, die Anforderungen an den WebSocket-Chat zu spezifieren. Eine Anforderungsspezifikation entspricht einer systematisch dargestellten Sammlung von Anforderungen an ein System \autocite[43]{pohl_basiswissen_2009}. Eine Anforderung ist im IEEE Standard 620.16-1990 definiert als \glqq Eine Bedingung oder Fähigkeit, die ein System oder eine Komponente erfüllen oder besitzen muss, um einen Vertrag, einen Standard, eine Spezifikation oder anderweitig formal vorgeschriebene Dokumente zu erfüllen.\grqq{} Dabei wird zwischen funktionalen und nicht-funktionalen Anforderungen unterschieden. Funktionale Anforderungen beziehen sich auf ein erwartetes Ergebnis des Verhaltens einer bereitgestellten Funktion des Systems wohingegen nicht-funktionale Anforderungen an Qualitätsmerkmale des Systems gestellt werden \autocite[16]{pohl_basiswissen_2009}. Diese Qualitätsanforderungen können beispielsweise die Geschwindigkeit oder Verfügbarkeit eines Systems betreffen. Die ermittelten Anforderungen dienen als Basis für den Entwurf des Systems sowie die anschließende Implementierung. Des weiteren werden aus ihnen Testfälle abgeleitet, um die Einhaltung der Systemanforderungen zu überprüfen. 
 
 \subsubsection{Funktionale Anforderungen}
 Durch die Analyse der Funktionen der bestehenden Chat-Anwendung wurde eine Vielzahl von Anforderungen an den WebSocket-Chat ermittelt. Im Folgenden werden diese zusammengefasst und in die zugehörigen Bereiche eingeteilt.
@@ -1076,34 +1078,103 @@ Der Benchmark-Client nutzt die Funktionsweise der Clientanwendung. Für die Leis
 \subsubsection{Nicht-funktionale Anforderungen}
 Betrifft eine Anforderung mehrere oder alle funktionalen Anforderungen oder überschneidet sie, so handelt es sich um eine nicht-funktionale Anforderung \autocite[109]{balzert_lehrbuch_2011}. Für viele Anforderungen dieser Art lassen sich Qualitätskriterien definieren. Einer Studie von Forschern der University of Technology Sydney zufolge, sind die am häufigsten berücksichtigten Qualitätsmerkmale Leistung (performance) (89\%), Zuverlässigkeit (reliability) (68\%), Benutzbarkeit (usability) (62\%), Sicherheit (security) (60\%) und Wartbarkeit (maintainability) (55\%) \autocite[314]{mairiza_investigation_2010}. Die nicht-funktionalen Anforderungen an den WebSocket-Chat werden im folgenden Abschnitt diesen Kategorien zugeteilt. Da die zu entwickelnde Anwendung im Rahmen einer Lehrveranstaltung zu didaktischen Zwecken eingesetzt werden soll, werden Sicherheitsaspekte jedoch nicht betrachtet.
 \subsubsection*{Leistung}
-Anforderungen bezüglich der Leistung einer Anwendung spezifieren die Fähigkeit der Software eine angemessene Geschwindigkeit im Verhältnis zu den eingesetzten Ressourcen zu gewährleisten \autocite[315]{mairiza_investigation_2010}. 
+Anforderungen bezüglich der Leistung einer Anwendung spezifieren die Fähigkeit der Software eine angemessene Geschwindigkeit im Verhältnis zu den eingesetzten Ressourcen zu gewährleisten \autocite[315]{mairiza_investigation_2010}. So soll die Anwendung beim Senden einer Nachricht nicht auf eine Bestätigung des Empfängers warten, sondern weitere Aufgaben bearbeiten können. Die Messergebnisse des Leistungstests des WebSocket-Chats sollen maximal um das 2,5-Fache über den Werten der bestehenden Chat-Anwendung liegen. Dieser Faktor wird gewählt, da Forschungsergebnisse zeigen, dass die Kommunikation über WebSockets im Vergleich zu TCP einen Overhead von 150-250\% hat \autocite[1007]{skvorc_performance_2014}.
 
 \subsubsection*{Zuverlässigkeit}
-Anforderungen bezüglich der Zuverlässigkeit einer Anwendung spezifieren die Fähigkeit der Software fehlerfrei ein definiertes Leistungsniveau unter regulären Bedingungen für einen vorgegebenen Zeitraum einzuhalten \autocite[315]{mairiza_investigation_2010}. 
+Anforderungen bezüglich der Zuverlässigkeit einer Anwendung spezifieren die Fähigkeit der Software fehlerfrei ein definiertes Leistungsniveau unter regulären Bedingungen für einen vorgegebenen Zeitraum einzuhalten \autocite[315]{mairiza_investigation_2010}. Der WebSocket-Chat soll im Falle einer abgebrochenen Clientverbindung weiterhin für alle anderen Clients funktionieren. Der Client, dessen Verbindung fehlerhaft beendet wurde, wird aus der aktiven Chat-Sitzung entfernt und soll sich anschließend erneut anmelden können.
 
 \subsubsection*{Benutzbarkeit}
-Anforderungen bezüglich der Benutzbarkeit einer Anwendung betreffen die Interaktionen eines Benutzers mit dem System. Dies betrifft auch die Erlernbarkeit und Bedienbarkeit des Systems \autocite[315]{mairiza_investigation_2010}. 
+Anforderungen bezüglich der Benutzbarkeit einer Anwendung betreffen die Interaktionen eines Benutzers mit dem System. Dies betrifft auch die Erlernbarkeit und Bedienbarkeit des Systems \autocite[315]{mairiza_investigation_2010}. Der WebSocket-Chatclient soll durch die Verwendung von Angular 4 als \textit{Single-Page-Webanwendung} entwickelt werden. Eine solche Webanwendung besteht aus einer einzigen HTML-Seite, deren Inhalte dynamisch nachgeladen werden und somit die Notwendigkeit von Unterseiten entfällt. Des weiteren soll durch eine moderne Benutzeroberfläche sichergestellt werden, dass Benutzer intuitiv im System navigieren können. Die passende dynamische Skalierung für mobile Endgeräte soll ebenfalls gewährleistet sein.
 
 \subsubsection*{Wartbarkeit}
-Anforderungen bezüglich der Wartbarkeit einer Anwendung spezifieren, in welchem Maße der Quellcode der Software verständlich, korrigierbar und verbesserbar ist \autocite[315]{mairiza_investigation_2010}.
+Anforderungen bezüglich der Wartbarkeit einer Anwendung spezifieren, in welchem Maße der Quellcode einer Software verständlich, korrigierbar und verbesserbar ist \autocite[315]{mairiza_investigation_2010}. Der Quellcode des WebSocket-Chats ist in ausreichendem Maß zu dokumentieren. Es soll sichergestellt werden, dass Studenten des Fachbereichs (Wirtschafts-)Informatik nach einer angemessenen Einarbeitungszeit in der Lage sind, den Quellcode zu verstehen und zu erweitern. Da die Erweiterung der internen Abläufe im Fokus der Lehrveranstaltung steht, sollen die Klassen der jeweiligen Implementierungsform (\texttt{Simple} und \texttt{Advanced}) getrennt voneinander realisiert werden.
+\subsection{Entwurf und Implementierung des WebSocket-Chats}
+Der \textit{Entwurf} ist der Prozess, in welchem die Architektur, Komponenten, Schnittstellen sowie weitere Eigenschaften eines Systems hinsichtlich spezifizierter Anforderungen definiert werden \autocite[25]{insitute_of_electrical_and_electronics_engineers_ieee_1990}. Der Entwurf wird für die Implementierung der Anwendung bentötigt und dokumentiert anhand formeller Darstellungen die Architektur der Software. \\
+
+\noindent Die \textit{Implementierung} beschreibt den Prozess, in welchem der Entwurf in die Komponenten einer Software umgesetzt wird \autocite[38]{insitute_of_electrical_and_electronics_engineers_ieee_1990}. Dabei werden die abstrakten Modelle durch die Verwendung geeigneter Datenstrukturen und Algorithmen in eine konkrete Programmiersprache umgesetzt. Die Entscheidungen, die während der Implementierungsphase getroffen werden, müssen dokumentiert werden.
+\subsubsection{Entwurf}
+Neben dem Entwurf der internen Software-Architektur muss auch die physische Architektur und die Distribution auf der technischen Infrastruktur beachtet werden \autocite[6]{balzert_lehrbuch_2011}. Der zu entwickelnde WebSocket-Chat wird nicht produktiv eingesetzt. Das bedeutet, dass keine Archivierung von Nachrichten oder eine anderweitige Persistierung von Zuständen der Anwendung erfolgt. Die Software-Architektur des WebSocket-Chats kann daher vereinfacht werden. Die Serveranwendung besteht lediglich aus einem funktionalen Teil, der die Anfragen der Clients bearbeitet. Die Clientanwendung im Browser des Anwenders verfügt zusätzlich noch über einen Darstellungsteil in Form von HTML-Seiten. Der Anwendungsteil zur Durchführung der Lasttests soll als Konsolenanwendung ohne grafische Oberfläche zur Verfügung stehen.
+Der WebSocket-Chat wird als Client-Server-System entworfen. Die einzelnen Anwendungsteile lassen sich dabei auf verschiedenen Hostsystemen ausführen. Als Webanwendung besteht zudem die Möglichkeit, die Clientanwendung durch den Webserver bereitstellen zu lassen, der auch die Serveranwendung ausführt. Die URI des WebSocket-Serverendpunkts wird in diesem Fall relativ zum Kontextpfad der Clientanwendung angegeben. \\
+
+\medskip
+\begin{figure}[ht] 
+	\begin{center}
+		\includegraphics[scale=0.7]{img/vtfinb.pdf}
+		\caption{Bereitstellung von Front-und Back-End durch Tomcat Catalina}
+		\label{fig:Verteilung1}
+	\end{center}
+\end{figure}
+
+\noindent Diese Flexibilität wird durch den Einsatz von Java und dem TypeScript-Framework Angular 4 gewährleistet. Die Serveranwendung wird als \textit{Web Application Archive} (WAR) Servlet von einem Webserver bereitgestellt, der die Spezifikation für Java Servlets implementiert und die Java WebSockets-API unterstützt. Der Servlet-Container \textit{Catalina} des \textit{Apache Tomcat} stellt diese Funktionalitäten ab Version 7.0.56 zur Verfügung.\\
+
+\medskip
+\begin{figure}[ht] 
+	\begin{center}
+		\includegraphics[scale=0.8]{img/vtfohneb.pdf}
+		\caption{Bereitstellung des Front-Ends durch Node.js-Webserver}
+		\label{fig:Verteilung2}
+	\end{center}
+\end{figure}
+
+\noindent Der Einsatz von Angular 4 ermöglicht die dedizierte Bereitstellung des kompilierten Front-Ends auf einem \textit{Node.js}-Webserver. Node.js ist ein JavaScript Framework, das auf der Chrome V8 JavaScript Engine basiert und die Entwicklung von serverseitigen JavaScript-Anwendungen ermöglicht \autocite{node_js_foundation_node.js_2018}. Da Client- und Serveranwendung auf dedizierten Hostsystemen ausgeführt werden, muss der Clientanwendung die vollständige URI des Serverendpunkts bekannt sein.\\
+
+\noindent Da der WebSocket-Chatserver ohne grafische Benutzeroberfläche implementiert werden soll und die zusätzlichen Klassen der TCP-Verbindungssteuerung entfallen, reduziert sich der Umfang in den Packages deutlich. Ein detailliertes Klassendiagramm des WebSocket-Chatservers ist in den Abbildungen \ref{fig:kdcommon} und \ref{fig:kdserver} im Anhang zu finden. Der WebSocket-Benchmark-Client verfügt ebenfalls über das Package \texttt{edu.hm.dako.chat.common} und dessen Inhalt. Auf die formelle Darstellung der \texttt{Main}-Klasse wurde verzichtet. Das Klassendiagramm des WebSocket-Benchmark-Clients ist in Abbildung \ref{fig:kdbench} dargestellt. \\
+
+\noindent Die Architektur des WebSocket-Chatclients wird durch die Verwendung des Angular Frameworks um zusätzliche Elemente erweitert, die in Java Anwendungen nicht zu finden sind. Dabei handelt es sich um Komponenten (\textit{Components}) mit einem Anzeigebereich (\textit{View}) und \textit{Services}. Jede Angular Anwendung setzt sich aus verschiedenen Komponenten eines bestimmten Aufgabenbereichs zusammen. Sie sind hierarchisch aufgebaut, wobei alle Komponenten einer Hauptkomponente (\textit{Root Component}) untergeordnet sind. Der Anzeigebereich einer Komponente dient der Darstellung eines HTML-\textit{Templates}, mit welchem der Benutzer interagieren kann \autocite[66]{woiwode_angular_2017}. Services sind Klassen, die ihre Funktionen für andere Klassen bereitstellen. Sie enthalten mehrfach verwendbaren Code und werden über das Entwurfsmuster \textit{Dependency Injection} (DI) bereitgestellt \autocite[117]{woiwode_angular_2017}. DI folgt dem Prinzip der \textit{Inversion of Control} (IoC), welches besagt, dass die Erzeugung einer Abhängigkeit nicht von dem abhängigen Objekt durchgeführt wird, sondern alle Abhängigkeiten an einem zentralen Ort (DI-Container) verwaltet werden. Der Aufbau des WebSocket-Chatclients ist in Abbildung \ref{fig:kdClient} im Anhang dargestellt. Die Klassen des \textit{common}-Packages sind nicht enthalten, da ihre Darstellung zu der in Abbildung \ref{fig:kdcommon} identisch ist.
+
+\subsubsection{Implementierung}
+Die Implementierung aller Java-Module wird in der Entwicklungsumgebung \textit{Eclipse Java EE IDE for Web Developers} in Version Oxygen.2 Release (4.7.2) durchgeführt. Die installierte Version von Java ist 1.8.0\_144. Zur Verwaltung der Abhängigkeiten wird Apache Maven 3.5.0 eingesetzt. Die Entwicklung des WebSocket-Chatclients erfolgt in \textit{Visual Studio Code} Version 1.18 und TypeScript 2.6.2. Für die Nutzung des Angular 4 Frameworks wird die Paketverwaltung \textit{npm} in Version 3.10.10 eingesetzt. Die Entwicklung wird auf dem Betriebssystem \textit{macOS High Sierra} 10.13.3 durchgeführt\\
+
+\noindent Zur Umsetzung der Architektur des WebSocket-Chatservers wurde ein Maven-Projekt verwendet, um alle benötigten Bibliotheken bereitzustellen. Neben den Bibliotheken, welche aus der bestehenden Anwendung übernommen wurden, wird die Java WebSocket-API sowie Bibliotheken zur Transformation von Java Objekten in das \textit{JSON} Format benötigt. Dieses dient der leichtgewichtigen, textuellen Repräsentation von Objekten in einer leicht lesbaren Form. Die \texttt{ChatPDUs} werden in diesem Format zwischen den Endpunkten übertragen.\medskip
+
+\begin{lstlisting}[frame=single, language=Java, caption=AdvancedWebSocketServer Annotation,label=lst:wsServerImpl]
+	@ServerEndpoint(value = "/advancedchat", encoders = { ChatPDUEncoder.class }, decoders = { ChatPDUDecoder.class })
+	public class AdvancedWebSocketServer extends AbstractWebSocketServer { ... }
+\end{lstlisting}
+
+\noindent Durch die Deklaration der Encoder- und Decoder-Klassen des Serverendpunkts erfolgt die Umwandlung der \texttt{ChatPDUs} in JSON-Objekte automatisch anhand des Vorgehens, welches in den jeweiligen Methoden definiert wurde. Die \texttt{@OnClose}-Methode musste speziell für den Fall angepasst werden, dass Clients die Verbindung durch das Beenden des Browsers oder das Verlassen der Seite schließen. Der Client wird bei Bedarf aus noch vorhandenen Wartelisten und der Liste der angemeldeten Clients entfernt, da jeder weitere Versuch eine Nachricht an diesen Client zu senden mit einer Exception (\textit{broken pipe}) abgebrochen wird.\medskip
+
+\begin{lstlisting}[frame=single, language=Java, caption=Senden einer ChatPDU label=lst:wsServerPDU]
+	@Override
+	public void sendPduToClient(ClientListEntry client, ChatPDU pdu) {
+		try {
+			Session session = client.getSession();
+			session.getBasicRemote().sendObject(pdu);
+		} catch (IOException | EncodeException e) {
+		log.error(e.getMessage());
+		}
+	}
+\end{lstlisting}
+
+\noindent Das Senden einer \texttt{ChatPDU} erfolgt über die zugehörige \texttt{Session} eines Clients. Die Übertragung findet synchron an das \texttt{BasicRemote}-Objekt statt, da die asynchrone Alternative bei Nachrichten von geringer Größe keinen Vorteil bietet. \\
+
+\noindent Die Realisierung des Benchmark-Clients setzt die Verwendung einer Bibliothek voraus, welche die Java WebSocket-API implementiert. Dazu wird die Referenzimplementierung \textit{Project Tyrus} der Oracle Corporation eingesetzt. Die Anzahl gleichzeitiger Chat-Clients sollte nebenläufig durch Threads abgebildet werden. Jedoch werden durch die Bibliothek pro Client drei Threads erzeugt, wohingegen in der bestehenden Chatanwendung nur ein Thread pro Client eingesetzt wurde. Trotz zusätzlicher Synchronisierungsmechanismen war es nicht möglich die Funktionalität herzustellen. Die Leistungsmessung wird aus diesem Grund in mehreren Prozessen durchgeführt.\\
+
+\noindent 
 
 
-
-
-Modernes UI responsive, singlepage, Fehlertolerant, nicht blockieren nach Senden der Nachricht, 
-\subsection{Entwurf des WebSocket-Chats}
-\subsection{Implementierung und Test des WebSocket-Chats}
-
-\section{Evaluation}
-\subsection{Test-Umgebung}
-\subsection{Probleme}
-\subsection{Leistungsanalyse WebSocket-Chat}
-
-\section{Zusammenfassung und Ausblick}
-\subsection{Einsatzgebiete}
-% Unterschrift (handgeschrieben)
 
 \newpage
+\section{Evaluation}\label{sec:Evaluation}
+\subsection{Test-Umgebung}
+\subsection{Probleme}
+\subsection{Leistungsanalyse WebSocket-Chat} \label{subsec:Benchmark}
+Die Metrik zur Messung der Leistung des WebSocket Chats ist die \textit{Round Trip Time} (RTT). Dabei handelt es sich um die Zeit, die zwischen dem Stellen einer Anfrage und dem Eintreffen der zugehörigen Antwort vergeht.
+\medskip
+\begin{figure}[ht] 
+	\begin{center}
+		\includegraphics[scale=1.0]{img/rtt.pdf}
+		\caption{Metriken der Leistungsmessung des WebSocket-Chats}
+		\label{fig:RTT}
+	\end{center}
+\end{figure}
+
+\noindent Die Zeit, die der Server zur Bearbeitung der Anfrage benötigt, wird als \textit{Server Time} bezeichnet. Die Dauer der reinen Kommunikation errechnet sich aus der Differenz zwischen RTT und Server Time ($ \text{T}_{\text{k}} = \text{RTT}-\text{Server Time} $).
+\newpage
+\section{Zusammenfassung und Ausblick}
+
+\newpage
+\appendix
 \pagenumbering{Roman}
 \printbibliography
 \newpage
@@ -1113,7 +1184,7 @@ Modernes UI responsive, singlepage, Fehlertolerant, nicht blockieren nach Senden
 \newpage
 \lstlistoflistings
 \newpage
-\section*{Anhang}
+\section{Anhang}
 \begin{figure}[ht] 
 	\begin{center}
 		\includegraphics[scale=0.17]{img/benchClientUI.jpg}
@@ -1121,5 +1192,38 @@ Modernes UI responsive, singlepage, Fehlertolerant, nicht blockieren nach Senden
 		\label{fig:dakoBenchClientUI}
 	\end{center}
 \end{figure}
+
+\begin{landscape}
+\begin{figure}[ht] 
+	\begin{center}
+		\includegraphics[scale=0.45]{img/pkgCommon.pdf}
+		\caption[]{Klassendiagramm: WebSocket-Server \textit{common}-Package}
+		\label{fig:kdcommon}
+	\end{center}
+\end{figure}
+\begin{figure}[ht] 
+	\begin{center}
+		\includegraphics[scale=0.5]{img/pkgServer.pdf}
+		\caption[]{Klassendiagramm: WebSocket-Server \textit{server}-Package}
+		\label{fig:kdserver}
+	\end{center}
+\end{figure}
+\begin{figure}[ht] 
+	\begin{center}
+		\includegraphics[scale=0.4]{img/Bench.pdf}
+		\caption[]{Klassendiagramm: WebSocket-Benchmark \textit{benchmark}-Package}
+		\label{fig:kdbench}
+	\end{center}
+\end{figure}
+\begin{figure}[ht] 
+	\begin{center}
+		\includegraphics[scale=0.5]{img/KDClient.pdf}
+		\caption[]{Klassendiagramm: WebSocket-Client}
+		\label{fig:kdClient}
+	\end{center}
+\end{figure}
+\end{landscape}
+
+\section*{Eidesstattliche Erklärung}
 
 \end{document}
