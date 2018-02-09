@@ -95,6 +95,7 @@
                   
 \numberwithin{equation}{section} 
 \counterwithin{figure}{section}
+\counterwithin{table}{section}
 
 % einige Abkuerzungen
 \newcommand{\C}{\mathbb{C}} % komplexe
@@ -154,11 +155,17 @@
 	
   \end{center}
 \end{titlepage}
-
+\newpage
+\vspace*{9cm}
+\begin{quote}
+\onehalfspacing{{\Large \textit{People keep asking me what I think of it now that it's done. }\\\textit{Hence my protest: The Web is not done!}\\}}
+\medskip
+	Tim Berners-Lee
+\end{quote}
 \newpage
 \section*{Abstract}
 \addcontentsline{toc}{section}{Abstract}
-Hier steht am Ende was genau eigentlich mit dem Unsinn hier erreicht werden soll.
+
 \newpage
   % Inhaltsverzeichnis
  \tableofcontents
@@ -170,9 +177,11 @@ Hier steht am Ende was genau eigentlich mit dem Unsinn hier erreicht werden soll
   \pagestyle{headings}
 
 \section{Einleitung}\label{sec:Einleitung}
-Die Anforderungen an Webanwendungen haben sich in den vergangenen Jahren stark verändert. Mobile Geräte wie Smartphones oder Tablets ersetzen stationäre Systeme, Webanwendungen sollen zur Kollaboration eingesetzt werden und Buchungssysteme oder Finanzanwendungen verlangen die Bearbeitung tausender Anfragen mit minimaler Verzögerung. Das Hypertext Transfer Protocol (HTTP) bietet hier keine zufriedenstellende Lösung. Um den Anforderungen an moderne Webanwendungen gerecht zu werden, spezifizierten das World Wide Web Consortium (W3C) und die Internet Engineering Taskforce (IETF) das WebSocket-Protokoll mit zugehöriger JavaScript-API. \\
+Der Austausch von Informationen ist für die heutige Gesellschaft von fundamentaler Bedeutung. Deren digitale Repräsentation variierte je nach verwendetem System bis zur Entwicklung des World Wide Web (WWW) durch Tim Berners-Lee im Jahr 1989. Geleitet von seinem Grundgedanken eines möglichst einfachen, lizenzfreien und verteilten Systems entwickelte er das Hypertext Transfer Protocol (HTTP), die Hypertext Markup Language (HTML) und die Uniform Resource Identifier (URI). Diese Simplizität trägt noch heute zur Popularität des WWW bei. Doch die Anforderungen an Webanwendungen haben sich in den vergangenen Jahren stark verändert. Mobile Geräte wie Smartphones oder Tablets ersetzen stationäre Systeme, Webanwendungen sollen zur Kollaboration eingesetzt werden und Buchungssysteme oder Finanzanwendungen verlangen die Bearbeitung tausender Anfragen mit minimaler Verzögerung. HTTP bietet hier keine zufriedenstellende Lösung. Um den Anforderungen an moderne Webanwendungen gerecht zu werden, spezifizierten das World Wide Web Consortium (W3C) und die Internet Engineering Taskforce (IETF) das WebSocket-Protokoll mit zugehöriger JavaScript-API. Dabei machten die Entwickler es sich zur Aufgabe, einen Mechanismus zu standardisieren, der es browserbasierten Anwendungen ermöglicht bidirektional zu kommunizieren ohne dabei mehrere HTTP Verbindungen zu öffnen \autocite{fette_websocket_2011}.\\
 
-\noindent Die Entwickler des WebSocket Protokolls machten es sich zur Aufgabe, einen Mechanismus zu schaffen, der es browserbasierten Anwendungen ermöglicht bidirektional zu kommunizieren ohne dabei auf mehrere HTTP Verbindungen zu öffnen \autocite{fette_websocket_2011}. Dabei sollte auf zusätzliche Methoden - wie beispielsweise den Einsatz von XMLHttpRequests, iframes oder long polling - verzichtet werden.
+\noindent HTML5 WebSockets sollen die Vorteile webbasierter Architekturen mit den Eigenschaften des verbindungsorientierten Protokolls TCP kombinieren. Dadurch können Webanwendungen mit nur wenigen Verwaltungsdaten Informationen gleichzeitig senden und empfangen. Eine hohe Kompabilität zu bestehenden Web-Infrastrukturen und Sicherheitssystemen ist gewährleistet, da das WebSocket-Protokoll von aktuellen Webservern bereitgestellt werden kann. Das Ziel dieser Arbeit ist die Migration der Kommunikationsstrukturen einer bestehenden Anwendung auf HTML5 WebSockets, um von diesen Vorteilen profitieren zu können. Bei der Anwendung handelt es sich um ein Chatsystem, welches im Rahmen der Lehrveranstaltung \glqq Datenkommunikation\grqq{} im dritten Semester des Studiengangs B.Sc. Wirtschaftsinformatik an der Hochschule München eingesetzt wird. Die zu entwickelnde Anwendung soll zur Ergänzung des Lehrmittelportfolios in passenden Lehrveranstaltungen eingesetzt werden können. Die Voraussetzung für eine fachgerechte Umsetzung der Anforderungen ist ein fundiertes Verständnis von den Funktionsweisen der WebSockets sowie deren Implementierung in verschiedenen Programmiersprachen.\\
+
+\noindent Der Aufbau dieser Arbeit gliedert sich in sechs Kapitel. In Kapitel 2 wird das WebSocket-Protokoll anhand seiner Spezifikation detailliert erläutert. Kapitel 3 behandelt die zugehörige WebSocket-API und beschreibt deren Implementierung in der Programmiersprache Java. In Kapitel 4 wird die bestehende Chatanwendung analysiert, die Architektur des neuen WebSocket-Chats entworfen und anschließend implementiert. Diese Implementierung wird in Kapitel 5 evaluiert, indem die Messergebnisse der Leistungstest beider Anwendungen verglichen werden. Kapitel 6 schließt mit einem Fazit und gibt einen Ausblick auf die zukünftige Entwicklung und offene Aspekte.
 
 \newpage
 \section{Das WebSocket Protokoll}\label{sec:WebSocketProtokoll}
@@ -237,12 +246,10 @@ In Abschnitt 5.4. des RFC6455 ist die Fragmentierung von WebSocket-Frames beschr
 
 \noindent Daraus folgt, dass die Verarbeitung sowohl fragmentierter als auch unfragmentierter Nachrichten von allen Endpunkten unterstützt werden muss. Da Control-Frames nicht fragmentiert werden dürfen, können Fragmente lediglich von den Typen Text, Binary oder einem der reservierten opcodes (0x3-7) sein. Die Angabe des Typs erfolgt durch den opcode des ersten Fragments. Alle weiteren Fragmente tragen den opcode 0x0, der dem Empfänger mitteilt, dass die empfangenen Nutzdaten an den Payload des vorangegangen Frames angehängt werden sollen \autocite{shepherd_writing_2017}.
 \subsubsection*{Maskierung}\label{subsubsec:wsMasking}
-WebSocket Frames, von einem Client zu einem Server gesendet, müssen maskiert werden. Dieser Mechanismus war im ursprünglichen Draft für das WebSocket Protokoll nicht vorgesehen. In Folge einer Untersuchung durch eine Gruppe von Forschern rund um ein Team der Carnegie Mellon Universität wurden Sicherheitslücken in dem Konzept aufgedeckt. Bei der Verwendung transparenter Proxy-Server konnten sie durch deren fehlerhafte Implementierung des, bei dem Aufbau einer WebSocket Verbindung genutzten, \textit{Upgrade} Mechanismus den Cache des Proxies infizieren \autocite{huang_talking_2011}. Daraufhin wurde der Draft überarbeitet und um die Maskierung über eine bitweise XOR Verknüpfung ergänzt. \\
-
-\noindent Da der zur Maskierung des Payloads verwendete Schlüssel im Frame enthalten ist, steht hier nicht die Vertraulichkeit der gesendeten Daten im Vordergrund. Vielmehr sollen Proxy-Server daran gehindert werden, den Inhalt des Payloads zu lesen. Somit wird verhindert, dass Angreifer den Payload manipulieren und diesen für einen Angriff gegen einen Proxy einsetzen können \autocite{gorski_websockets_2015}.  Im Folgenden soll der Ablauf der Maskierung einer Textnachricht an einem Beispiel verdeutlicht werden:\\
+WebSocket Frames, von einem Client zu einem Server gesendet, müssen maskiert werden. Dieser Mechanismus war im ursprünglichen Draft für das WebSocket Protokoll nicht vorgesehen. In Folge einer Untersuchung durch eine Gruppe von Forschern rund um ein Team der Carnegie Mellon Universität wurden Sicherheitslücken in dem Konzept aufgedeckt. Bei der Verwendung transparenter Proxy-Server konnten sie durch deren fehlerhafte Implementierung des, bei dem Aufbau einer WebSocket Verbindung genutzten, \textit{Upgrade} Mechanismus den Cache des Proxies infizieren \autocite{huang_talking_2011}. Daraufhin wurde der Draft überarbeitet und um die Maskierung über eine bitweise XOR Verknüpfung ergänzt. Da der zur Maskierung des Payloads verwendete Schlüssel im Frame enthalten ist, steht hier nicht die Vertraulichkeit der gesendeten Daten im Vordergrund. Vielmehr sollen Proxy-Server daran gehindert werden, den Inhalt des Payloads zu lesen. Somit wird verhindert, dass Angreifer den Payload manipulieren und diesen für einen Angriff gegen einen Proxy einsetzen können \autocite{gorski_websockets_2015}.  Im Folgenden soll der Ablauf der Maskierung einer Textnachricht an einem Beispiel verdeutlicht werden:\\
 
 \noindent Zunächst wählt der Client einen bisher nicht verwendeten 32 Bit Schlüssel aus, der zur Maskierung verwendet werden soll. Die Nachricht, die maskiert werden soll lautet "cs.hm.edu", konvertiert in hexadezimale Darstellung "63 73 2e 68 6d 2e 65 64 75". Als Schlüssel wird "3c 2e 3f 4a" verwendet. Dieser wird nun zyklisch auf den zu maskierenden Payload mit der XOR-Operation angewendet.\\
-
+\renewcommand{\arraystretch}{1.2}
 \begin{table*}[ht]
 	\begin{center}
 	\begin{tabular}{|l|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|}
@@ -255,7 +262,7 @@ WebSocket Frames, von einem Client zu einem Server gesendet, müssen maskiert we
 	\caption{Maskierung durch bitweise XOR-Verknüpfung}\label{tbl:wsMasking}
 		\end{center}
 \end{table*}
-\vspace{-3mm}
+
 \noindent Die maskierte Nachricht wird mit dem Schlüssel in dem WebSocket-Frame abgelegt. Der Server kann diese nach dem Empfang durch erneute Anwendung der selbstinversen XOR-Operation demaskieren \autocite{gorski_websockets_2015}.
 
 \begin{table*}[ht]
@@ -271,7 +278,7 @@ WebSocket Frames, von einem Client zu einem Server gesendet, müssen maskiert we
 		\caption{Demaskierung durch bitweise XOR-Verknüpfung}\label{tbl:wsDemasking}
 	\end{center}
 \end{table*}
-
+\renewcommand{\arraystretch}{1}
 \noindent Die Übertragung von Server zu Client darf hingegen nicht maskiert werden. Empfängt ein Server eine unmaskierte bzw. ein Client eine maskierte Nachricht, so muss in beiden Fällen die Verbindung geschlossen werden. Dabei kann der im RFC6455 spezifierte Statuscode \textit{1002 (protocol error)} beim Verbindungsabbau angegeben werden \autocite[26]{fette_websocket_2011}.
 
 \subsubsection{Control-Frames}\label{subsubsec:wsCFrames}
@@ -818,12 +825,8 @@ Die Spezifikation des WebSocket-Protokolls ermöglicht die Bereitstellung von Su
 		public void afterResponse(HandshakeResponse hr) {
 			// Pruefen, ob Feature aktiviert werden konnte
 			boolean activated = hr.getHeaders().get("My-Feature-Field").get(0)
-												.equals("activated");		
-			if(activated){
-				// MyFeature nutzen
-			} else {
-				// Auf Fallback-Mechanismus zurueckgreifen
-			}
+												.equals("activated"); 	
+			// Aktivieren des Features oder Fallback
 			super.afterResponse(hr);
 		}
 
@@ -832,13 +835,10 @@ Die Spezifikation des WebSocket-Protokolls ermöglicht die Bereitstellung von Su
 			// HTTP-Headerfeld fuer "MyFeature" erzeugen
 			List<String> featureParam = new ArrayList<String>();
 			featureParam.add("enable");
-			
 			// HTTP-Header erweitern
 			headers.put("My-Feature-Field", featureParam);
-			
 			super.beforeRequest(headers);
-		}
-	}
+	}	}
 \end{lstlisting}
 
 \noindent Die Konfiguration des Server durch die \texttt{ServerEndpointConfig} Schnittstelle bietet ebenfalls den Zugriff auf einen Konfigurator. Zudem ist es möglich die unterstützten Subprotokolle und Erweiterungen des Servers sowie die Klasse des Endpunkts abzurufen. Die Ermittlung des relativen Pfads des Serverendpunkts wird in Abschnitt \ref{subsubsec:apiPathMapping} detailliert behandelt. \\
@@ -847,25 +847,18 @@ Die Spezifikation des WebSocket-Protokolls ermöglicht die Bereitstellung von Su
 
 \begin{lstlisting}[frame=single, language=Java, caption=Java: ServerEndpointConfig Konfigurationsklasse, label=lst:sConf]
 	public class MyServerConfig extends ServerEndpointConfig.Configurator {
-		@Override
-		public boolean checkOrigin(String originHeaderValue) {
-			// Hier kann die Pruefung des Origin-Headers durchgefuehrt werden
-		}
+	
+		@Override // Hier kann die Pruefung des Origin-Headers durchgefuehrt werden
+		public boolean checkOrigin(String originHeaderValue) { ... }
 		
-		@Override
-		public <T> T getEndpointInstance(Class<T> endpointClass) throws InstantiationException {
-			// Hier kann die Erzeugung einer neuen Instanz angepasst werden
-		}
+		@Override // Hier kann die Erzeugung einer neuen Instanz angepasst werden
+		public <T> T getEndpointInstance(Class<T> endpointClass) throws InstantiationException { ... }
 		
-		@Override
-		public List<Extension> getNegotiatedExtensions(List<Extension> installed, List<Extension> requested) {
-			// Hier kann der Standardablauf der Wahl der Erweiterung veraendert werden
-		}
+		@Override // Hier kann der Standardablauf der Wahl der Erweiterung veraendert werden
+		public List<Extension> getNegotiatedExtensions(List<Extension> installed, List<Extension> requested) { ... }
 		
-		@Override
-		public String getNegotiatedSubprotocol(List<String> supported, List<String> requested) {
-			// Hier kann der Standardablauf der Protokollwahl veraendert werden
-		}
+		@Override // Hier kann der Standardablauf der Protokollwahl veraendert werden
+		public String getNegotiatedSubprotocol(List<String> supported, List<String> requested) { ... }
 		
 		@Override
 		public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response) {
@@ -879,8 +872,7 @@ Die Spezifikation des WebSocket-Protokolls ermöglicht die Bereitstellung von Su
 				
 				// HTTP-Antwort-Header erweitern
 				response.getHeaders().put("My-Feature-Field", featureParam);
-			}
-		}
+		}	}	
 	}
 \end{lstlisting}
 
@@ -1148,7 +1140,7 @@ Die Implementierung aller Java-Module wird in der Entwicklungsumgebung \textit{E
 
 \noindent Das Senden einer \texttt{ChatPDU} erfolgt über die zugehörige \texttt{Session} eines Clients. Die Übertragung findet synchron an das \texttt{BasicRemote}-Objekt statt, da die asynchrone Alternative bei Nachrichten von geringer Größe keinen Vorteil bietet und die zusätzliche Verwaltung von Future-Objekten oder Callback-Methoden die Komplexität erhöht. Da zwischen den verschiedenen Implementierungsformen eine Trennung erfolgen soll, werden zwei Endpunkte auf unterschiedlichen URIs\footnote{\texttt{/simplechat} und \texttt{/advancedchat}} bereitgestellt. Die Wahl der zu verwendenden Implementierung erfolgt durch die Clientanwendung. \\
 
-\noindent Die Realisierung des Benchmark-Clients setzt die Verwendung einer Bibliothek voraus, welche die Java WebSocket-API implementiert. Dazu wird die Referenzimplementierung \textit{Project Tyrus} der Oracle Corporation eingesetzt. Die Anzahl gleichzeitiger Chat-Clients sollte nebenläufig durch Threads abgebildet werden. Jedoch werden durch die Bibliothek pro Client drei Threads erzeugt, wohingegen in der bestehenden Chatanwendung nur ein Thread pro Client eingesetzt wurde. Trotz zusätzlicher Synchronisierungsmechanismen war es nicht möglich die Funktionalität zu gewährleisten. Die Leistungsmessung wird aus diesem Grund in mehreren Prozessen ausgeführt.\\
+\noindent Die Realisierung des Benchmark-Clients setzt die Verwendung einer Bibliothek voraus, welche die Java WebSocket-API implementiert. Dazu wird die Referenzimplementierung \textit{Project Tyrus} der Oracle Corporation eingesetzt. Die Anzahl gleichzeitiger Chat-Clients sollte nebenläufig durch Threads abgebildet werden. Jedoch werden durch die Bibliothek pro Client drei Threads erzeugt, wohingegen in der bestehenden Chatanwendung nur zwei Threads pro Client eingesetzt wurden. Trotz zusätzlicher Synchronisierungsmechanismen war es nicht möglich die Funktionalität zu gewährleisten. Die Leistungsmessung wird aus diesem Grund in mehreren Prozessen ausgeführt. Die Abläufe und Funktionen des bestehenden Benchmark-Clients wurden übernommen.\\
 
 \noindent Die Basisstruktur der Clientanwendung wird mit Hilfe der Angular-CLI erstellt. Für die Nutzung von WebSockets in einer Angular Anwendung wird die Bibliothek \textit{RxJS} benötigt. RxJS ist der JavaScript-Teil des Open-Source-Projekts \textit{ReactiveX.io}, welches den Einsatz von asynchroner Programmierung und des \texttt{Observable} Entwurfsmusters erleichtert. Sie bietet zudem eine Unterstützung für WebSockets. Die API wird durch \texttt{npm install rxjs} dem Projekt hinzugefügt und in dem Service \texttt{websocket.service.ts} hinzugefügt.\medskip
 
@@ -1208,10 +1200,72 @@ Die Implementierung aller Java-Module wird in der Entwicklungsumgebung \textit{E
 
 \newpage
 \section{Evaluation}\label{sec:Evaluation}
-\subsection{Test-Umgebung}
-\subsection{Probleme}
+Die Durchführung der Leistungsmessung soll einen Vergleich zwischen der bestehenden Chatanwendung und dem entwickelten WebSocket-Chat ermöglichen. Dazu sollen die Implementierungen der jeweiligen Benchmark-Clients eingesetzt werden. Zur Realisierung einer geeigneten Umgebung wird ein dediziertes Netzwerk verwendet, in welchem die Clients und der Server ausgeführt werden können. Der Aufbau des Netzwerks ist in Abbildung \ref{fig:evalNetwork} dargestellt.
+\medskip
+\begin{figure}[ht] 
+	\begin{center}
+		\includegraphics[scale=1]{img/umgebung.pdf}
+		\caption{Netzwerk der Test-Konfiguration}
+		\label{fig:evalNetwork}
+	\end{center}
+\end{figure}
+
+\noindent Der WebSocket-Chatserver befindet sich auf einem dedizierten Host, der die Anwendung mittels des Webservers \textit{Apache Tomcat} (Version 9.0.0.M26) bereitstellt. Die Benchmark-Clients werden als virtuelle Maschinen auf einem Hostsystem ausgeführt. Es kommen drei dieser Instanzen zum Einsatz. Die physikalischen Hosts verfügen jeweils über eine 1000 Mbit/s Verbindung. Die technische Konfiguration der Testsysteme ist in Tabelle \ref{tbl:evalEnv} abgebildet. \\
+
+\renewcommand{\arraystretch}{1.5}
+\begin{table*}[ht]
+	\begin{center}
+		\begin{tabular}{|c|>{\centering\arraybackslash}m{7cm}|>{\centering\arraybackslash}m{5cm}|}
+			\hline
+			 &  \textbf{Benchmark-VM} &  \textbf{WebSocket-Chatserver}  \\ \hline
+			\textbf{OS} &  Ubuntu 16.04 LTS &  macOS HighSierra \\ \hline
+			\textbf{CPU} &  1 Core &  Intel Core i5-7360U  \\ \hline
+			\textbf{RAM} &  4GB &  8GB  \\ \hline
+			\textbf{Virtualization} &  VMWare Workstation Pro 12 &  -  \\ \hline
+			\textbf{Hypervisor} &  Typ2 (OS: Windows 10 x64, CPU: Intel Core i5-4460, RAM: 16GB) &  -  \\ \hline
+		\end{tabular}
+		\caption{Konfiguration der Test-Umgebung}\label{tbl:evalEnv}
+	\end{center}
+\end{table*}
+\renewcommand{\arraystretch}{1}
+\noindent Die Messungen der bestehenden Anwendung werden in der gleichen Umgebung durchgeführt. Jedoch wird hier nur eine der virtuellen Maschinen für die Clientanwendung eingesetzt. Die IP-Adressen der Systeme werden manuell konfiguriert. Die Serveranwendungen sind über die TCP-Ports 8080 (WebSocket-Chatserver) bzw. 50000 (TCP-Chatserver) erreichbar. 
+\subsection{Komplikationen} \label{subsec:EvalKompl}
+Die Anwendungen sollten sich lediglich durch die Verwendung des Übertragungsprotokolls unterscheiden, um die Vergleichbarkeit der Messergebnisse zu gewährleisten. Die Simulation mehrerer gleichzeitiger Benutzer soll nebenläufig durch Threads erfolgen. Die zur Realisierung des Benchmark-Clients eingesetzte Bibliothek \textit{Tyrus 1.12} verwendet für jede Verbindung eines WebSocket-Clients drei Threads, wohingegen die ursprüngliche Implementierung die Verwendung von zwei Threads vorsieht. Trotz zusätzlicher Synchronisierungsmechanismen konnte die fehlerfreie Ausführung der WebSocket-Leistungsmessungen nicht gewährleistet werden. Aus diesem Grund wird der WebSocket-Benchmarkclient in mehreren Prozessen gestartet. Der zusätzliche Aufwand zur Verwaltung der Prozesse durch das Betriebssystem wirkt sich negativ auf die Leistung des WebSocket-Chats aus. Durch die Verwendung einer anderen WebSocket-Bibliothek oder eines browserbasierten Benchmarkings könnte eine erhebliche Verbesserung der Messergebnisse erzielt werden. \\
+
+\noindent Die Prozesse der WebSocket-Clients zur Leistungsmessung werden auf die drei virtuellen Maschinen verteilt. Damit diese in möglichst kurzen Zeitabständen starten können, wird deren Ausführung durch zwei Bash-Skripte gesteuert. Das erste Skript trägt die Bezeichnung \texttt{start\_benchmark.sh} und empfängt folgende Werte als Parameter:
+\renewcommand{\arraystretch}{1.5}
+\begin{table*}[ht]
+	\begin{center}
+		\begin{tabular}{|>{\centering\arraybackslash}m{4cm}|m{7.5cm}|>{\centering\arraybackslash}m{3cm}|}
+			\hline
+			  \textbf{Parameter} & \textbf{Beschreibung} & \textbf{Beispiel} \\ \hline
+			  Adresse des WebSocket-Servers & Die Angabe muss den verwendeten Port und den Namen der Anwendung enthalten, unter welcher der Endpunkt bereitgestellt wird. & 10.0.0.1:8080/chat \\ \hline
+			  Anzahl der Clients pro Host & Im Skript können die IP-Adressen der Systeme hinterlegt werden, die als Hosts für die Benchmark-Clients dienen. Es wird auf jedem Host die übergebene Anzahl Clients gestartet. & 10 (x3 = 30)\\ \hline
+			  Anzahl Nachrichten & Die Anzahl der Nachrichten, die pro Client gesendet werden sollen. & 10 \\ \hline
+			  Nachrichtenlänge & Die Länge einer Nachricht in Byte. & 10 \\ \hline
+			  Denkzeit des Clients & Die Zeit in ms, die ein Client zwischen dem Senden von zwei Nachrichten wartet. & 100 \\ \hline
+			  Benutzen des AdvancedChats & Anhand dieser Angabe wird der zu verwendende Implementierungstyp festgelegt. & y oder n\\ \hline
+		\end{tabular}
+		\caption{Parameter des Benchmark-Skripts}\label{tbl:scriptParams}
+	\end{center}
+\end{table*}
+\renewcommand{\arraystretch}{1}
+
+\noindent Das Skript stellt bei seiner Ausführung eine SSH-Verbindung zu den hinterlegten Hosts her und führt dort das Skript \texttt{run\_client\_benchmark.sh} im Hintergrund aus. Hier findet der Aufruf des Benchmark-Clients statt, welcher ebenfalls als Hintergrund-Prozess gestartet wird. Der jeweils letzte Aufruf blockiert die weitere Ausführung, damit Skript und Benchmark-Prozess zeitgleich enden. Der Benchmark-Client sammelt alle Messwerte und legt sie als JSON-String in einer Textdatei ab. Wurden alle Instanzen des Benchmark-Clients beendet, werden die Resultate der einzelnen Testläufe durch das Startskript gesammelt und von einer Java-Konsolenanwendung ausgewertet. Diese importiert die Informationen aller Clients und ermittelt die statistischen Ergebnisse des gesamten Durchlaufs.
+
+\begin{lstlisting}[frame=single, caption=Resultat eines Benchmark-Clients, label=lst:evalJSONResultat]
+	{
+		"userName":"Client-Thread-1", "implementation":"Advanced",
+		"totalEvents":6, "sendMessages":2,	"loginEvents":2, "logoutEvents":2,
+		"chatPduRtt":[28270117128,17249212499],
+		"serverTime":[25951704704,17245024235]
+	}
+\end{lstlisting}
+
+\noindent Die Leistungsmessung der bestehenden Chatanwendung kann jedoch nicht auf mehrere Hosts aufgeteilt werden, da jede Instanz die Benutzernamen der Clients gleich nummeriert. Das System verhindert jedoch die Anmeldung gleichnamiger Benutzer. Aus diesem Grund wird die Leistungsmessung der TCP-Chatanwendung auf nur einer virtuellen Maschine durchgeführt.
+
 \subsection{Leistungsanalyse WebSocket-Chat} \label{subsec:Benchmark}
-Die Metrik zur Messung der Leistung des WebSocket-Chats ist die \textit{Round Trip Time} (RTT). Dabei handelt es sich um die Zeit, die zwischen dem Stellen einer Anfrage und dem Eintreffen der zugehörigen Antwort vergeht.
+Die Metrik zur Messung der Leistung des WebSocket-Chats ist die \textit{Round Trip Time} (RTT). Dabei handelt es sich um die Zeit, die zwischen dem Stellen einer Anfrage und dem Eintreffen der zugehörigen Antwort vergeht. Die Zeit, die der Server zur Bearbeitung der Anfrage benötigt, wird als \textit{Server Time} bezeichnet. Die Dauer der reinen Kommunikation errechnet sich aus der Differenz zwischen RTT und Server Time ($ \text{T}_{\text{k}} = \text{RTT}-\text{Server Time} $).
 \medskip
 \begin{figure}[ht] 
 	\begin{center}
@@ -1221,9 +1275,40 @@ Die Metrik zur Messung der Leistung des WebSocket-Chats ist die \textit{Round Tr
 	\end{center}
 \end{figure}
 
-\noindent Die Zeit, die der Server zur Bearbeitung der Anfrage benötigt, wird als \textit{Server Time} bezeichnet. Die Dauer der reinen Kommunikation errechnet sich aus der Differenz zwischen RTT und Server Time ($ \text{T}_{\text{k}} = \text{RTT}-\text{Server Time} $).
+\noindent Für die Leistungsmessungen wird die Anzahl der aktiven Clients variiert. Jeder Client versendet 10 Nachrichten mit einer Länge von 10 Byte. Die Clients haben eine maximale Denkzeit von 100 ms. Jede Messung wird dabei fünf Mal wiederholt. Die Ergebnisse der Advanced-Benchmarks sind in den Tabellen \ref{tbl:evalWebSocket} und \ref{tbl:evalTCP} zusammengefasst. Insbesondere bei den Zeitmessungen der Round Trip Time und der Serverzeit ist zu erkennen, dass die Messergebnisse des WebSocket-Chats die Werte des TCP-Chats signifikant übersteigen.Die Ursachen dieser Abweichungen sind zahlreich. Zum einen wirken sich die in Abschnitt \ref{subsec:EvalKompl} beschriebenen Unterschiede negativ auf die Leistungsfähigkeit des WebSocket-Chats aus, zum anderen liegen sie in der Verschiedenartigkeit der Protokolle selbst begründet. \\
+
+\begin{figure}[ht] 
+	\begin{center}
+		\includegraphics[scale=0.5]{img/benchmark-rttst.pdf}
+		\caption{Messergebnisse RTT und Serverzeit}
+		\label{fig:evalRttSt}
+	\end{center}
+\end{figure}
+\begin{figure}[ht] 
+	\begin{center}
+		\includegraphics[scale=0.7]{img/benchmark-tk.pdf}
+		\caption{WebSocket-Overhead für reine Kommunikationsdauer}
+		\label{fig:evalTk}
+	\end{center}
+\end{figure} 
+\noindent Das WebSocket-Protokoll agiert auf einer höheren Schicht des TCP/IP-Referenzmodells und benötigt zusätzliche Zeit und Rechenleistung für die Übertragung von der TCP-Schicht in die eigene Ebene. Zudem verwendet das WebSocket-Protokoll eventgesteuerte Callback-Mechanismen, die zusätzlichen Verwaltungsaufwand auf Anwendungsebene erfordern \autocite[1007]{skvorc_performance_2014}. Der zeitliche Aufwand für die Maskierung clientseitiger Nachrichten kann nicht dediziert erfasst werden und erhöht die erfassten Messwerte ebenfalls. Darüber hinaus könnten auch die Java-Implementierungen der Protokolle ins Gewicht fallen. Das WebSocket-Protokoll wurde erst vor kurzer Zeit entwickelt und die verwendete API ist eine frühe Referenzimplementierung, wohingegen TCP bereits seit Jahrzehnten eingesetzt wird und kontinuierlich optimiert wurde \autocite[1007]{skvorc_performance_2014}. \\
+
+\noindent Auch die Dauer der reinen Kommunikation des WebSocket-Chats übersteigt die des TCP-Chats, jedoch reduziert sich der Overhead (Berechnung anhand Gleichung \ref{eq:Overhead}) mit steigender Anzahl verbundener Clients. \\
+\begin{equation}\label{eq:Overhead}
+	O_{T_{k}} = \dfrac{T_{k (WebSocket)} - T_{k(TCP)}}{T_{k(TCP)}} \ast 100\%
+\end{equation}
+
+\noindent Ausschlaggebend für diese Entwicklung sind die unterschiedlichen Nachrichtengrößen und die Verwendung der Callback-Mechanismen. Die übrigen Faktoren wirken sich erst beim Einsatz mehrerer Clients wesentlich auf die reine Kommunikationszeit aus. Beispielsweise ist der zusätzliche Aufwand für Kontextwechsel bei nur drei Threads sehr gering, bzw. bei nur einem Prozess muss kein Kontextwechsel durchgeführt werden. \\
+
+\noindent Die bestehende Chatanwendung zeigt im direkten Leistungsvergleich einen signifkanten Geschwindigkeitsvorteil. Die Kommunikation über TCP ist leichtgewichtiger und schneller als über WebSockets. Zur besseren Vergleichbarkeit sollten jedoch weitere Anwendungen und Bibliotheken zur Leistungsmessung herangezogen werden. Beispielsweise birgt der Einsatz einer Java WebSocket-Bibliothek, die eine Parallelisierung durch Threading ermöglicht, erhebliches Verbesserungspotential. Zudem sollten sich WebSocket-Leistungsmessungen auf Webtechnologien wie JavaScript oder Typescript fokussieren, da diese den primären Anwendungsfall für einen Client darstellen. 
+
 \newpage
-\section{Zusammenfassung und Ausblick}
+\section{Fazit und Ausblick}
+In dieser Arbeit wurde die praktische Einsetzbarkeit von HTML5 WebSockets anhand der Migration der Kommunikationsstruktur einer auf TCP-Sockets basierenden Chatanwendung geprüft. Dazu wurden in Kapitel 2 zunächst die wichtigsten Aspekte der neuen Protokollspezifikation detailliert dargelegt, um daraus die Vorzüge der Technologie gegenüber dem Anfrage/Antwort-Verfahren von HTTP abzuleiten. Durch das WebSocket-Protokoll können Informationen zwischen Server und Client bidirektional ausgetauscht werden, ohne dass der Client eine neue Anfrage initiieren muss. Des weiteren reduziert es den durch Zusatzinformationen verursachten Overhead erheblich, da dieser nach dem erfolgreichem Aufbau einer Verbindung lediglich 2-14 Byte beträgt. Die Implementierung des Protokolls durch die WebSocket-API des W3C und das entsprechende Java-Pendant wurden in Kapitel 3 ausführlich vorgestellt.\\
+
+\noindent Anhand der daraus gewonnenen Erkenntnisse wurde in Kapitel 4 die Überarbeitung der Chatanwendung geplant und durchgeführt. Hierzu wurde zunächst eine Anforderungsanalyse anhand der Funktionalität des Altsystems durchgeführt. Auf dieser Grundlage wurde die Architektur des WebSocket-Chats entworfen und anschließend implementiert. Die entwickelte Anwendung ermöglicht den Austausch von Chatnachrichten für mehrere Benutzer. Die Funktionalität ist dabei für eine Vielzahl verschiedener Endgeräte gewährleistet. In Kapitel 5 werden die Leistung der WebSocket-Chatanwendung und die des Altsystems gegenübergestellt. Die Messergebnisse zeigen, dass der WebSocket-Chat bis zu 13-mal länger für die Bearbeitung einer Anfrage benötigt, als der TCP-Chat bei gleicher Anzahl angemeldeter Benutzer. Diese Werte resultieren zum einen aus der Beziehung zwischen den Protokollen. Das WebSocket-Protokoll agiert auf Anwendungsebene und setzt auf TCP auf. Die Übertragung zwischen den Schichten erfordert zusätzliche Zeit sowie Rechenleistung und führt folglich zu schlechteren Leistungswerten. Zum anderen werden die Ergebnisse jedoch von diversen Komplikationen bei der Umsetzung beeinflusst, die nicht im Zusammenhang mit den verwendeten Protokollen stehen. \\
+
+\noindent Die Technologie der HTML5 WebSockets überzeugt sowohl durch die funktionale, leichtgewichtige Architektur des Protokolls, als auch durch die komfortable Handhabung der zugehörigen APIs. Entwickler moderner Webanwendungen, die Informationen zwischen Server und Client bidirektional austauschen sollen, verfügen dadurch über einen standardisierten Weg zur Umsetzung dieser Anforderung. Die Unterstützung von WebSockets ist inzwischen durch nahezu alle aktuellen Webbrowser und -server gegeben. Dennoch kann aus Leistungsgründen von der Migration bestehender Systeme abgeraten werden, insofern deren Kommunikation auf TCP basiert und innerhalb des eigenen Netzwerks stattfindet. Jedoch werden mit zunehmender Akzeptanz und Verbreitung diverse Erweiterungen und Optimierungen das WebSocket-Protokoll verbessern. Daher sollten weitere Untersuchungen sowohl die Leistungsfähigkeit der unterschiedlichen WebSocket-Bibliotheken einer Programmiersprache, als auch zwischen den verschiedenen Programmiersprachen auf deren Leistungsfähigkeit vergleichen. 
 
 \newpage
 \appendix
@@ -1244,6 +1329,40 @@ Die Metrik zur Messung der Leistung des WebSocket-Chats ist die \textit{Round Tr
 		\label{fig:dakoBenchClientUI}
 	\end{center}
 \end{figure}
+
+\renewcommand{\arraystretch}{1.5}
+\begin{table*}[ht]
+	\begin{center}
+		\begin{tabular}{|l|c|c|c|c|c|c|c|c|}
+			\hline
+			Anzahl Clients& \cellcolor{lightgrey}\textbf{3} & \textbf{15} & \cellcolor{lightgrey}\textbf{30} & \textbf{45} &\cellcolor{lightgrey}\textbf{60} & \textbf{75} & \cellcolor{lightgrey}\textbf{90} & \textbf{99} \\ \hline
+			Min. RTT & \cellcolor{lightgrey}27 & 9 &\cellcolor{lightgrey}19 & 18 & \cellcolor{lightgrey}28 & 26 & \cellcolor{lightgrey}51 & 64 \\ \hline
+			Max. RTT & \cellcolor{lightgrey}154 & 1991 & \cellcolor{lightgrey}5618 & 10321 & \cellcolor{lightgrey}18260 & 25881 & \cellcolor{lightgrey}35720 & 43344\\ \hline
+			Mittlere RTT & \cellcolor{lightgrey}58 & 700 & \cellcolor{lightgrey}2052 & 3838 & \cellcolor{lightgrey}6642 & 9698 & \cellcolor{lightgrey}13580 & 16264 \\ \hline
+			Mittlere Serverzeit & \cellcolor{lightgrey}32 & 657 & \cellcolor{lightgrey}1975 & 3745 & \cellcolor{lightgrey}6369 & 9406 & \cellcolor{lightgrey}13354 & 15970 \\ \hline
+			T$_{k}$ & \cellcolor{lightgrey}26 & 43 & \cellcolor{lightgrey}77 & 93 & \cellcolor{lightgrey}273 & 192 & \cellcolor{lightgrey}226 & 294 \\ \hline
+		\end{tabular}
+		\caption{Ergebnisse der WebSocket-Leistungsmessung}\label{tbl:evalWebSocket}
+	\end{center}
+\end{table*}
+\renewcommand{\arraystretch}{1}
+
+\renewcommand{\arraystretch}{1.5}
+\begin{table*}[ht]
+	\begin{center}
+		\begin{tabular}{|l|c|c|c|c|c|c|c|c|}
+			\hline
+			Anzahl Clients& \cellcolor{lightgrey}\textbf{3} & \textbf{15} & \cellcolor{lightgrey}\textbf{30} & \textbf{45} & \cellcolor{lightgrey}\textbf{60} & \textbf{75} & \cellcolor{lightgrey}\textbf{90} & \textbf{99} \\ \hline
+			Min. RTT & \cellcolor{lightgrey}4 & 7 &\cellcolor{lightgrey}13 & 21 & \cellcolor{lightgrey}20 & 28 & \cellcolor{lightgrey}26 & 28 \\ \hline
+			Max. RTT& \cellcolor{lightgrey}17 & 105 & \cellcolor{lightgrey}379 & 793 & \cellcolor{lightgrey}1409 & 2460 & \cellcolor{lightgrey}2414 & 2974\\ \hline
+			Mittlere RTT & \cellcolor{lightgrey}8 & 32 & \cellcolor{lightgrey}158 & 364 & \cellcolor{lightgrey}557 & 978 & \cellcolor{lightgrey}1127 & 1280 \\ \hline
+			Mittlere Serverzeit& \cellcolor{lightgrey}4 & 26 & \cellcolor{lightgrey}118 & 274 & \cellcolor{lightgrey}441 & 734 & \cellcolor{lightgrey}933 & 1047 \\ \hline
+			T$_{k}$& \cellcolor{lightgrey}4 & 6 & \cellcolor{lightgrey}40 & 90 & \cellcolor{lightgrey}116 & 244 & \cellcolor{lightgrey}194 & 233 \\ \hline
+		\end{tabular}
+		\caption{Ergebnisse der TCP-Leistungsmessung}\label{tbl:evalTCP}
+	\end{center}
+\end{table*}
+\renewcommand{\arraystretch}{1}
 
 \begin{landscape}
 \begin{figure}[ht] 
