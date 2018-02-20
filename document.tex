@@ -158,6 +158,12 @@
   \end{center}
 \end{titlepage}
 \newpage
+\section*{Erklärung gemäß § 15 Abs. 10 APO i.V.m. § 35 Abs. 7 RaPO}
+Hiermit erkläre ich, dass ich die vorliegende Bachelorarbeit selbständig verfasst, noch nicht anderweitig für Prüfungszwecke vorgelegt, keine anderen als die angegebenen Quellen oder Hilfsmittel benützt sowie wörtliche und sinngemäße Zitate als solche gekennzeichnet habe.
+\vspace*{3cm}
+
+\noindent München, den 21. Februar 2018
+\newpage
 \vspace*{9cm}
 \begin{quote}
 \onehalfspacing{{\Large \textit{People keep asking me what I think of it now that it's done. }\\\textit{Hence my protest: The Web is not done!}\\}}
@@ -339,7 +345,7 @@ Der Abbau einer WebSocket-Verbindung erfolgt durch den Versand eines Close-Frame
 	\caption{Close-Frame-Antwort des Servers}
 	\label{fig:wsCloseFrameServer}
 \end{figure*}
-
+\newpage
 \noindent Abbildung \ref{fig:wsCloseFrameClient} zeigt einen maskierten Close-Frame, der von einem Client abgesetzt wurde. Der maskierte Payload enthält dabei den Status-Code \textit{1000}. Dieser wurde in der Antwort des Servers ebenfalls zurückgemeldet. Hierbei handelt es sich um die Angabe \textit{Normal Closure}, die besagt, dass die Verbindung ordnungsgemäß beendet wurde. Der RFC 6455 definiert vier Status-Gruppen mit folgender Bedeutung \autocite[46]{fette_websocket_2011}:
 \begin{description}
 	\item[0-999] Dieser Bereich wird nicht genutzt.
@@ -370,7 +376,7 @@ Der Abbau einer WebSocket-Verbindung erfolgt durch den Versand eines Close-Frame
 Das WebSocket-Protokoll basiert auf dem Transmission Control Protocol und durchläuft wie dieses verschiedene Phasen der Kommunikation. Zu Beginn wird ähnlich zu TCP ein Opening-Handshake zum Verbindungsaufbau durchgeführt. Auch am Ende der Datenübertragung wird ein solcher Handshake eingesetzt, um die Verbindung ordnungsgemäß zu beenden. Die Ports, die vom WebSocket-Protokoll verwendet werden, sind Port 80 (ungesicherte Verbindungen) und Port 443 (gesicherte Verbindungen). Aktuell wird deren Verwendung jedoch vom HTTP(S)-Protokoll dominiert und sie müssen daher geteilt werden. Deshalb wird der Verbindungsaufbau als HTTP-Upgrade-Anfrage initiiert. Zukünftige Implementierungen könnten dies jedoch durch einen einfacheren Mechanismus über einen dedizierten Port ablösen, ohne das WebSocket-Protokoll umgestalten zu müssen \autocite[3]{fette_websocket_2011}. Im folgenden Abschnitt werden die notwendigen Schritte zum Verbindungsaufbau und -abbau erläutert sowie ein beispielhafter Ablauf der Übertragung über eine WebSocket-Verbindung gezeigt.
 
 \subsubsection{Verbindungsaufbau}\label{subsubsec:wsOpen}
-Da Verbindungen über die Ports 80 bzw. 443 in den meisten Firewalls zugelassen werden, bedarf es keiner neuen Freigaben bei der Verwendung von WebSockets. Allerdings sind diese Ports oftmals durch einen HTTP-Server belegt. Aus diesem Grund bedarf es beim Aufbau einer WebSocket-Verbindung der Kooperation mit HTTP. Der Client sendet dazu einen HTTP-Upgrade-Request, der um spezielle Felder erweitert wurde.
+Da Verbindungen über die Ports 80 bzw. 443 in den meisten Firewalls zugelassen werden, bedarf es keiner neuen Freigaben bei der Verwendung von WebSockets. Allerdings sind diese Ports oftmals durch einen HTTP-Server belegt. Aus diesem Grund bedarf es beim Aufbau einer WebSocket-Verbindung der Kooperation mit HTTP. Der Client sendet dazu einen HTTP-Upgrade-Request, der um spezielle Felder erweitert wurde.\\
 
 \begin{figure*}[ht]
 	\begin{center}
@@ -438,7 +444,9 @@ Befindet sich die WebSocket-Verbindung nach dem erfolgreichen Opening-Handshake 
 \noindent In Abbildung \ref{fig:wsDataTransfer} ist eine Nachricht mit dem Inhalt \texttt{WebSocket 2018} von einem Server an einen Client gesendet worden. Als \texttt{opcode} wurde \texttt{0x1} angegeben, der besagt, dass es sich bei der Art des Payloads um eine Textnachricht handelt. Die Größe der Nutzdaten beträgt 14 Byte und die Nachricht konnte ohne Fragmentierung vollständig übertragen werden.
 
 \subsubsection{Verbindungsabbau}\label{subsubsec:wsClose}
-Der Abbau einer WebSocket-Verbindung erfolgt anhand eines Closing-Handshakes. Er soll den \texttt{FIN/ACK}-Closing-Handshake von TCP ergänzen, da dieser insbesondere bei der Verwendung von Proxy-Servern oder Vermittlungsstellen nicht garantiert zwischen genau zwei Endpunkten abläuft \autocite[9]{fette_websocket_2011}. Laut RFC 6455 sollen so Szenarien vermieden werden, in denen Daten unnötigerweise verloren gehen. Wird beispielsweise ein Proxy-Server verwendet, so verbindet sich ein Client mit diesem anstelle des eigentlichen Ziels. Der Proxy-Server stellt daraufhin selbst eine Verbindung zum Zielhost her und vermittelt die Pakete zwischen Client und Server. Schließt einer der Endpunkte die TCP-Verbindung, obwohl der andere Kommunikationspartner noch Daten überträgt, so kann es sein, dass die Verbindung zwischen dem Proxy und dem schließenden Endpunkt bereits abgebaut ist. Die noch ausstehende Datenübertragung schlägt fehl. Über den zusätzlichen Closing-Handshake des WebSocket-Protokolls wird die zugrundeliegende TCP-Verbindung erst geschlossen, wenn die WebSocket-Sitzung bereits abgebaut ist.\\
+Der Abbau einer WebSocket-Verbindung erfolgt anhand eines Closing-Handshakes. Er soll den \texttt{FIN/ACK}-Closing-Handshake von TCP ergänzen, da dieser insbesondere bei der Verwendung von Proxy-Servern oder Vermittlungsstellen nicht garantiert zwischen genau zwei Endpunkten abläuft \autocite[9]{fette_websocket_2011}. Laut RFC 6455 sollen so Szenarien vermieden werden, in denen Daten unnötigerweise verloren gehen. \\
+
+\noindent Wird beispielsweise ein Proxy-Server verwendet, so verbindet sich ein Client mit diesem anstelle des eigentlichen Ziels. Der Proxy-Server stellt daraufhin selbst eine Verbindung zum Zielhost her und vermittelt die Pakete zwischen Client und Server. Schließt einer der Endpunkte die TCP-Verbindung, obwohl der andere Kommunikationspartner noch Daten überträgt, so kann es sein, dass die Verbindung zwischen dem Proxy und dem schließenden Endpunkt bereits abgebaut ist. Die noch ausstehende Datenübertragung schlägt fehl. Über den zusätzlichen Closing-Handshake des WebSocket-Protokolls wird die zugrundeliegende TCP-Verbindung erst geschlossen, wenn die WebSocket-Sitzung bereits abgebaut ist.\\
 
 \noindent Die Einleitung eines Verbindungsabbaus kann sowohl vom Client als auch vom Server erfolgen. Dazu wird ein Frame mit dem \texttt{opcode}-Wert \texttt{0x8} an den Kommunikationspartner versendet. Der versendende Endpunkt wechselt mit dem Absenden des Closing-Frames vom \texttt{OPEN}- in den \texttt{CLOSING}-Status. Ebenso gilt dies beim Empfang eines Closing-Frames, insofern selbst noch keiner versendet wurde. Danach eintreffende oder zu sendende Nachrichten müssen verworfen werden. Haben beide Endpunkte sowohl einen Closing-Frame gesendet als auch empfangen, so gilt die Verbindung als beendet (Status: \texttt{CLOSED}) und die darunterliegende TCP-Verbindung kann geschlossen werden. Dies sollte stets vom Server begonnen werden, damit er im Status \texttt{TIME WAIT} verbleibt. Der Client kann so die Verbindung durch das Senden eines neuen \texttt{SYN} unverzüglich wieder eröffnen \autocite[41]{fette_websocket_2011}. Die Zustände, die ein WebSocket annehmen kann, sowie deren Übergänge sind detailliert in der Abbildung auf Seite \pageref{fig:wsLifeCycle} dargestellt. \\
 
@@ -453,7 +461,7 @@ Der Abbau einer WebSocket-Verbindung erfolgt anhand eines Closing-Handshakes. Er
 \noindent Abbildung \ref{fig:wsClosingHandshake} zeigt den schematischen Ablauf des Closing-Handshakes. Der Client initiiert diesen, indem er einen Closing-Frame mit dem Statuscode 1000 versendet. Der Server reagiert mit einer entsprechenden Antwort, wobei der Status aus dem ersten Frame übernommen wurde. Nachdem der Closing-Handshake abgeschlossen wurde, befinden sich beide Endpunkte im Status \texttt{CLOSED} und die zugrundeliegende TCP-Verbindung kann beendet werden.
 
 \subsection{Alternative Verfahren}\label{subsubsec:AlternativeVerfahren}
-Die Kommunikation mittels HTTP basiert auf einem Request/Response-Verfahren. Dabei sendet der Client immer eine Anfrage an einen Server. Dieser antwortet mit einer Statuszeile und entsprechendem Statuscode. Anschließend gilt die Übertragung als beendet und kann durch eine erneute Anfrage des Clients neu gestartet werden. Eine Möglichkeit, Daten vom Server an den Client zu senden, ist in der Spezifikation von HTTP nicht vorgesehen. Verändert sich der Zustand einer serverseitigen Ressource, so kann der Client darüber bei einer reinen HTTP-Verbindung nur durch erneutes Anfragen informiert werden. Allerdings benötigen viele Anwendungsfälle diese Funktion. Aus diesem Grund wurde eine Vielzahl von Verfahren entwickelt, die diese Mechanismen abbilden sollen. Im Folgenden werden einige dieser Verfahren kurz vorgestellt und hinsichtlich ihrer Vor- und Nachteile gegenüber WebSockets analysiert.\\
+Die Kommunikation mittels HTTP basiert auf einem Request/Response-Verfahren. Dabei sendet der Client immer eine Anfrage an einen Server. Dieser antwortet mit einer Statuszeile und entsprechendem Statuscode. Anschließend gilt die Übertragung als beendet und kann durch eine erneute Anfrage des Clients neu gestartet werden. Eine Möglichkeit, Daten vom Server an den Client zu senden, ist in der Spezifikation von HTTP nicht vorgesehen. Verändert sich der Zustand einer serverseitigen Ressource, so kann der Client darüber bei einer reinen HTTP-Verbindung nur durch erneutes Anfragen informiert werden. Allerdings benötigen viele Anwendungsfälle diese Funktion. Aus diesem Grund wurde eine Vielzahl von Verfahren entwickelt, die diese Mechanismen abbilden sollen. Im Folgenden werden einige dieser Verfahren kurz vorgestellt und hinsichtlich ihrer Vor- und Nachteile gegenüber WebSockets analysiert.
 
 \subsubsection{Polling}
 Durch die vom W3C standardisierte API XMLHttpRequest (XHR) wurde im Jahr 2012 eine Möglichkeit geschaffen, mittels JavaScript HTTP-Requests zu konstruieren \autocite{whatwg_xmlhttprequest_2006}. Ein XHR-Objekt registriert verschiedene Methoden, die bei einer Änderung des Objekts asynchron aufgerufen werden. Dadurch können Anfragen gesendet werden, ohne den weiteren Programmablauf zu blockieren. Dies bildet die technische Grundlage vieler moderner Web-Frontends, die unter dem Oberbegriff Ajax (\textit{Asynchronous JavaScript and XML}) zusammengefasst werden \autocite[26]{gorski_websockets_2015}. \\
@@ -774,7 +782,7 @@ Die W3C-WebSocket-API definiert lediglich textuelle und binäre Datentypen zur �
 	}
 \end{lstlisting}
 
-\noindent Ein Endpunkt, der nur über eine \texttt{@OnMessage}-Methode verfügt, die als Parameter ein Objekt vom Typ \texttt{MyObject} empfängt, muss beim Erhalt einer textuellen Nachricht diese dekodieren. Dies erfolgt über eine Klasse, die das \texttt{Decoder.Text<MyObject>}-Interface implementiert hat. Dazu ist es zunächst notwendig zu überprüfen, ob die Dekodierung möglich ist. Dies wird über die Methode \texttt{willDecode} sichergestellt. Anschließend wird das erwartete Objekt aus dem empfangenen Text dekodiert.\medskip
+\noindent Ein Endpunkt, der nur über eine \texttt{@OnMessage}-Methode verfügt, die als Parameter ein Objekt vom Typ \texttt{MyObject} empfängt, muss beim Erhalt einer textuellen Nachricht diese dekodieren. Dies erfolgt über eine Klasse, die das \texttt{Decoder.Text<MyObject>}-Interface implementiert hat. Dazu ist es zunächst notwendig zu überprüfen, ob die Dekodierung möglich ist. Dies wird über die Methode \texttt{willDecode} sichergestellt. Anschließend wird das erwartete Objekt aus dem empfangenen Text dekodiert.\\
 
 \noindent Damit ein WebSocket-Endpunkt Nachrichten enkodieren oder dekodieren kann, müssen die zugehörigen Klassen bekannt gemacht werden. Dies erfolgt durch deren Angabe als Parameter in der jeweiligen Klassenannotation. Sollen verschiedene Objekte versendet oder empfangen werden, so müssen entsprechende Encoder- und Decoderklassen bereitgestellt werden. Die Auswahl der passenden Klasse erfolgt anhand ihrer Reihenfolge in der Klassenannotation.\medskip
 
@@ -888,6 +896,7 @@ Die Konfiguration eines WebSocket-Serverendpunkts verlangt die Angabe eines Pfad
 \noindent \texttt{<ws-protocol-scheme>://<host>:<port>/<uri-path>?<query-string>}\\
 
 \noindent Das Protokollschema ist analog zu HTTP \textit{http(s)} bei WebSocket-URIs \textit{ws(s)}. Dabei entspricht die \textit{wss}-Angabe einer verschlüsselten WebSocket-Verbindung. Die Angabe des Hosts kann sowohl durch dessen IP-Adresse als auch durch seinen kanonischen Namen erfolgen. Die Angabe der Port-Nummer muss lediglich dann erfolgen, wenn der zugehörige Webserver nicht unter den für WebSockets standardisierten Ports 80 bzw. 443 erreichbar ist. Der URI-Pfad entspricht der \texttt{value}-Angabe in der Konfiguration des Serverendpunkts. Es gilt zu beachten, dass insbesondere bei der Nutzung von \textit{Java-Web-Archiven} (WAR), der Name der Anwendung häufig als deren Ausgangspunkt verwendet wird. Trägt die WAR-Datei die Bezeichnung \textit{example} und der WebSocket-Serverendpunkt ist unter \textit{/test} erreichbar, so lautet der URI-Pfad \textit{/example/test}. \\
+
 \noindent Der URI-Pfad kann dabei exakt oder unter Verwendung von \textit{URI-Templates} angegeben werden. Für die exakte Angabe ist es ausreichend, die URI-Pfadsegmente im \texttt{value}-Feld des WebSocket-Servers, getrennt durch \texttt{/}, zu hinterlegen. Clients können daraufhin die Verbindung unter diesem Pfad herstellen. Die Verwendung eines \textit{URI-Templates} ermöglicht die Angabe von Pfadvariablen, durch die verschiedene Aufrufe der URI unterschiedlich interpretiert werden können. Die Pfadvariablen werden durch geschweifte Klammern innerhalb des URI-Pfads angegeben und dürfen lediglich einfache Bezeichner ohne reservierte Sonderzeichen enthalten. Ein gültiger URI-Pfad unter Verwendung von Templates wäre demnach: \\
 
 \noindent\texttt{/app/\{access-level\}/v1}\\
@@ -898,8 +907,8 @@ Die Konfiguration eines WebSocket-Serverendpunkts verlangt die Angabe eines Pfad
 	@ServerEndpoint(value="/app/{access-level}")
 	public class MyServer{
 		@OnOpen
-		public void onOpen(@PathParam("access-level") String level, String message) {
-			// Nachricht differenziert nach Berechtigung bearbeiten.
+		public void onOpen(@PathParam("access-level") String level, String msg) {
+		 // Nachricht differenziert nach Berechtigung bearbeiten. 
 		}
 	}
 \end{lstlisting}
@@ -1169,7 +1178,7 @@ Die Implementierung aller Java-Module wird in der Entwicklungsumgebung \textit{E
 
 \noindent Dieser Service stellt zur Anbindung der bidirektional kommunizierenden WebSockets ein \texttt{Subject}-Objekt bereit, das Events empfangen und senden kann. Dazu wird sowohl ein \texttt{Observable}, das Events an mehrere Abonnenten senden kann, als auch ein \texttt{Observer} benötigt, der Daten empfängt. Ein Subject kann demnach sowohl eingesetzt werden, um eingehende Events von einem WebSocket an die Benutzeroberfläche weiterzuleiten als auch um Daten von dieser an den WebSocket zu übergeben. Dazu wird ein Observable-Objekt erstellt und die Callback-Methoden der abonnierenden Observer werden an die jeweiligen Event-Handler des WebSockets gebunden. Der Rückgabewert gibt an, dass die WebSocket-Verbindung geschlossen wird, wenn der abonnierende Observer sich abmeldet. Der Observer-Teil des Subjects definiert lediglich die Methode \texttt{next}, die dem Observer mitteilt, dass neue Daten vorliegen. In dieser wird zunächst geprüft, ob der zugrundeliegende WebSocket geöffnet ist, bevor die übergebenen Daten in einen JSON-String transformiert und versendet werden. Der WebSocket-Service wird vom Chat-Service verwendet. Dieser wandelt eingehende JSON-Strings in \texttt{ChatPDUs} und übernimmt Funktionen wie Verbindungsaufbau und -abbau.
 
-\noindent Der Ablauf und die Algorithmen des WebSocket-Chats sind in der abstrakten Klasse \texttt{AbstractChatClient} bzw. in deren konkreten Ausprägungen implementiert. Diese werden von den Komponenten App, Chat und Login verwendet. Die \texttt{AppComponent} ist die Hauptkomponente, von der aus die anderen gesteuert werden. Beim Aufruf der Website wird diese zuerst geladen und liefert die \texttt{LoginComponent}, falls der Benutzer noch nicht angemeldet ist. Andernfalls wird die \texttt{ChatComponent} bereitgestellt. \medskip
+\noindent Der Ablauf und die Algorithmen des WebSocket-Chats sind in der Klasse \texttt{AbstractChatClient} bzw. in deren konkreten Ausprägungen implementiert. Diese werden von den Komponenten App, Chat und Login verwendet. Die \texttt{AppComponent} ist die Hauptkomponente, von der aus die anderen gesteuert werden. Beim Aufruf der Website wird diese zuerst geladen und liefert die \texttt{LoginComponent}, falls der Benutzer noch nicht angemeldet ist. Andernfalls wird die \texttt{ChatComponent} bereitgestellt. \medskip
 
 \begin{lstlisting}[frame=single, caption=WebSocket-Client: AppComponent-View, label=lst:wsClientRoot]
 	<div *ngIf="!loggedIn; then thenBlock else elseBlock"></div>
@@ -1194,7 +1203,7 @@ Die Implementierung aller Java-Module wird in der Entwicklungsumgebung \textit{E
 
 \noindent Im unteren Bereich des Login-Views wird angezeigt, welche Implementierungsform die Client-Services nutzen. Diese Einstellung kann nicht zur Laufzeit verändert, sondern muss in der Konfiguration der Umgebung angepasst werden. Die zugehörigen Konfigurationsdateien lauten \texttt{environment.prod.ts} für die Einstellungen in der Produktivumgebung und \texttt{environment.ts} für Testumgebungen. Als Konfiguration für den Einsatz als eigenständige Anwendung dient die Datei \texttt{environment.ts}. Hier müssen neben der Implementierungsform auch die IP-Adresse bzw. der Hostname des WebSocket-Servers hinterlegt werden. Soll der WebSocket-Client hingegen ebenfalls von der Server-Anwendung ausgeliefert werden, so wird die Produktivkonfiguration verwendet. Dazu muss die durch den Befehl \texttt{ng build --prod --base-href /NAME\_DES\_JAVA-PROJEKTS/} kompilierte Client-Anwendung in den \texttt{webapp}-Ordner des WebSocket-Serverprojekts verschoben werden.\\
 
-\noindent Abschließend lässt sich feststellen, dass die definierten funktionalen Anforderungen ausnahmslos erfüllt wurden. Die bestehende Funktionalität der TCP-Chat-Anwendung konnte vollständig übernommen werden. Die Übertragung zwischen den Anwendungsteilen basiert nun auf HTML5 WebSockets. Bei der Umsetzung der nicht-funktionalen Anforderungen konnten die definierten Kriterien der Kategorien Zuverlässigkeit, Benutzbarkeit und Wartbarkeit erfüllt werden. Die Kriterien zur Leistung des WebSocket-Chats werden im nachfolgenden Kapitel geprüft. Diese konnten nicht erfüllt werden.
+\noindent Abschließend lässt sich feststellen, dass die definierten funktionalen Anforderungen ausnahmslos erfüllt wurden. Die bestehende Funktionalität der TCP-Chat-Anwendung konnte vollständig übernommen werden. Die Übertragung zwischen den Anwendungsteilen basiert nun auf HTML5-WebSockets. Bei der Umsetzung der nicht-funktionalen Anforderungen konnten die definierten Kriterien der Kategorien Zuverlässigkeit, Benutzbarkeit und Wartbarkeit erfüllt werden. Die Kriterien zur Leistung des WebSocket-Chats werden im nachfolgenden Kapitel geprüft. Diese konnten nicht erfüllt werden.
 
 \newpage
 \section{Evaluation}\label{sec:Evaluation}
@@ -1396,9 +1405,4 @@ In dieser Arbeit wurde die praktische Einsetzbarkeit von HTML5-WebSockets anhand
 \end{figure}
 \end{landscape}
 
-\section*{Eidesstattliche Erklärung}
-Hiermit versichere ich, dass ich diese Arbeit selbständig verfasst und keine anderen, als die angegebenen Quellen und Hilfsmittel benutzt, die wörtlich oder inhaltlich übernommenen Stellen als solche kenntlich gemacht und die Satzung der Hochschule München zur Sicherung guter wissenschaftlicher Praxis in der jeweils gültigen Fassung beachtet habe.\\
-\vspace*{3cm}
-
-\noindent München, den 21. Februar 2018
 \end{document}
