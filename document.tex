@@ -144,7 +144,7 @@
     Matrikelnummer: 14985716 \bigskip
 
 
-    15. Februar 2018
+    21. Februar 2018
     \vspace*{1.5cm}
     
     
@@ -193,7 +193,7 @@ Der Austausch von Informationen ist für die heutige Gesellschaft von fundamenta
 
 \newpage
 \section{Das WebSocket-Protokoll}\label{sec:WebSocketProtokoll}
-Die Arbeit an der Spezifikation des WebSocket-Protokolls begann bereits 2009, als es von Google in Zusammenarbeit mit Apple, Microsoft und Mozilla im Rahmen ihrer Kooperation WHATWG\footnote{Web Hypertext Application Technology Working Group unter: www.whatwg.org} der Internet Engineering Task Force (IETF) vorgeschlagen wurde. Bis Mai 2010 wurden zahlreiche Verbesserungen hinzugefügt, bis es schließlich in Version 76 \autocite{hickson_websocket_2010} im August 2010 an die \textit{BiDirectional or Server-Initiated HTTP} (HyBi) Task Force der IETF zur Weiterentwicklung übergeben wurde \autocite{fette_websocket_2010}. Neben vielen anderen Fortschritten wurde das Protokoll um die Möglichkeit erweitert binäre Dateien auszutauschen und es wurden Sicherheitslücken geschlossen, die in Verbindung mit Proxy-Servern entstehen konnten. Im Dezember 2010 wurde das WebSocket-Protokoll von der IETF zu dem Request for Comment (RFC) 6455 erklärt \autocite{fette_websocket_2011}. Dieser definiert auf über 70 Seiten neben den Kommunikationsphasen und verschiedenen Frames der WebSockets zahlreiche weitere technische Details und Definitionen. In diesem Kapitel sollen die wesentlichen Grundlagen der Protokollspezifikation dargelegt werden.\\
+Die Arbeit an der Spezifikation des WebSocket-Protokolls begann bereits 2009, als es von Google in Zusammenarbeit mit Apple, Microsoft und Mozilla im Rahmen ihrer Kooperation WHATWG\footnote{Web Hypertext Application Technology Working Group unter: www.whatwg.org (letzter Zugriff am 21.02.2018)} der Internet Engineering Task Force (IETF) vorgeschlagen wurde. Bis Mai 2010 wurden zahlreiche Verbesserungen hinzugefügt, bis es schließlich in Version 76 \autocite{hickson_websocket_2010} im August 2010 an die \textit{BiDirectional or Server-Initiated HTTP} (HyBi) Task Force der IETF zur Weiterentwicklung übergeben wurde \autocite{fette_websocket_2010}. Neben vielen anderen Fortschritten wurde das Protokoll um die Möglichkeit erweitert binäre Dateien auszutauschen und es wurden Sicherheitslücken geschlossen, die in Verbindung mit Proxy-Servern entstehen konnten. Im Dezember 2010 wurde das WebSocket-Protokoll von der IETF zu dem Request for Comment (RFC) 6455 erklärt \autocite{fette_websocket_2011}. Dieser definiert auf über 70 Seiten neben den Kommunikationsphasen und verschiedenen Frames der WebSockets zahlreiche weitere technische Details und Definitionen. In diesem Kapitel sollen die wesentlichen Grundlagen der Protokollspezifikation dargelegt werden.\\
 \begin{figure}[ht] \label{fig:wsOSI}
 \begin{center}
 	\includegraphics[scale=1]{img/osi.pdf}
@@ -354,7 +354,7 @@ Der Abbau einer WebSocket-Verbindung erfolgt durch den Versand eines Close-Frame
 	\item[4000-4999] In diesem Bereich können eigene Status-Codes definiert werden. Diese benötigen keine Registrierung und müssen den kommunizierenden Anwendungen bekannt sein. 
 \end{description}
 
-\noindent Die Spezifikation des WebSocket-Protokolls definiert bereits einige Status-Codes innerhalb des zweiten Bereichs. Allerdings werden diese nur als Vorschlag angegeben, was inzwischen zu einer unkontrollierten Vielfalt und damit verbunden zu einigen Problemen führte \autocite[53]{gorski_websockets_2015}. Bisher wurden nur wenige Status-Codes neben jenen aus der Spezifikation registriert. Die bisher offiziellen Registrierungen finden sich auf den zugehörigen Seiten der IANA.\footnote{unter https://www.iana.org/assignments/websocket/} Tabelle \ref{tbl:wsCloseCodes} (S.\pageref{tbl:wsCloseCodes}) zeigt einen kurzen Auszug der relevantesten Status-Codes. Es fällt auf, dass alle Neuregistrierungen durch Alexey Melnikov erfolgten, der bereits an der Spezifikation des Protokolls beteiligt war. In einer der betreffenden Anfragen zur Registrierung eines Status-Codes fragt Melnikov auch, ob diese Status-Codes genutzt werden und noch ein Interesse an deren Registrierung besteht \autocite{melnikov_additional_2012}.
+\noindent Die Spezifikation des WebSocket-Protokolls definiert bereits einige Status-Codes innerhalb des zweiten Bereichs. Allerdings werden diese nur als Vorschlag angegeben, was inzwischen zu einer unkontrollierten Vielfalt und damit verbunden zu einigen Problemen führte \autocite[53]{gorski_websockets_2015}. Bisher wurden nur wenige Status-Codes neben jenen aus der Spezifikation registriert. Die bisher offiziellen Registrierungen finden sich auf den zugehörigen Seiten der IANA.\footnote{unter https://www.iana.org/assignments/websocket/ (letzter Zugriff am 21.02.2018)} Tabelle \ref{tbl:wsCloseCodes} (S.\pageref{tbl:wsCloseCodes}) zeigt einen kurzen Auszug der relevantesten Status-Codes. Es fällt auf, dass alle Neuregistrierungen durch Alexey Melnikov erfolgten, der bereits an der Spezifikation des Protokolls beteiligt war. In einer der betreffenden Anfragen zur Registrierung eines Status-Codes fragt Melnikov auch, ob diese Status-Codes genutzt werden und noch ein Interesse an deren Registrierung besteht \autocite{melnikov_additional_2012}.
 
 \begin{table*}[ht]
 	\begin{center}
